@@ -23,8 +23,8 @@
 
 
 [PML]
- pml_up=ON
- pml_start=3000			//when PML start, unit is iteration step
+ pml=ON
+ pml_start=10e6			//when PML start, unit is iteration step
  left_pml_cells=1		//not work
  right_pml_cells=1//not work
  up_pml_cells=20
@@ -40,7 +40,7 @@
  mode_number=2			// 2 is default
  current_order=1		//not work
  interpolation_order=1		//not work
- field_type=Yee			//Yee, NDFX
+ field_type=Yee			//Yee, NoCherenkov
  field_ionization=OFF		//ON, OFF
 
  max_time=2600			//[minute]	not work
@@ -65,7 +65,7 @@
  lambda=0.8e-6
  division_lambda=20		// dx is [wavelength/divisionLambda]
  dt_ratio=0.94			// recommand below 0.96
- dF=0.0			//not work for now Using Marder's method. Leave it.
+ dF=0.01			// Using Marder's method. Leave it.
 
  dr_over_dz = 10		// dr/dz=10
 
@@ -83,7 +83,7 @@
  retard=0
  polarity=2
  loadPositionX=0e-5		//laser start position [m]
- loadPositionY=0.0e-5		//now work laser start position [m]
+ loadPositionY=0.0e-5		//laser start position [m]
  beamWaist=40e-6
  focus=200e-6
 

@@ -24,11 +24,11 @@ void interpolation(Domain *D,External *Ext)
 
 void interpolation_NDFX_1st(Domain *D,External *Ext)
 {
-   int i,j,m,i1,j1,istart,iend,jstart,jend,s,rank,numMode;
+   int ii,jj,i,j,m,i1,j1,istart,iend,jstart,jend,s,rank,numMode;
    double Bz,Br,Bp,Bx,By,Ez,Er,Ep,Ex,Ey,Pr,Pl,Sr,Sl;
    double coss[D->numMode],sins[D->numMode];
    double extE1,extE2,extE3,extB1,extB2,extB3,x,y,z,R,r,invR;
-   double wz1,wz2,wr1,wr2,WZ1,WZ2,WR1,WR2;
+   double wz1,wz2,wr1,wr2,WZ1,WZ2,WR1,WR2,y1,y2;
    ptclList *p;
    int myrank, nprocs;    
 
@@ -54,7 +54,7 @@ void interpolation_NDFX_1st(Domain *D,External *Ext)
          while(p) {
            z=p->z;  x=p->x; y=p->y;
            R=sqrt(x*x+y*y); invR=1.0/R;
-           r=R+0.5-(j-jstart);
+           r=R-(j-jstart);
 
            wz2=z;             wz1=1.0-wz2;
            wr2=r;             wr1=1.0-wr2;
@@ -70,79 +70,79 @@ void interpolation_NDFX_1st(Domain *D,External *Ext)
              sins[m]=sins[m-1]*coss[1]+coss[m-1]*sins[1];
            }
 
-           Ez=wz1*wr1*D->EzCR[0][i][j]
-             +wz2*wr1*D->EzCR[0][i+1][j]
-             +wz1*wr2*D->EzCR[0][i][j+1]
-             +wz2*wr2*D->EzCR[0][i+1][j+1];
-           Bz=wz1*wr1*D->BzCR[0][i][j]
-             +wz2*wr1*D->BzCR[0][i+1][j]
-             +wz1*wr2*D->BzCR[0][i][j+1]
-             +wz2*wr2*D->BzCR[0][i+1][j+1];
-           Pr=WZ1*WR1*D->PrCR[0][i1-1][j1-1]
-             +WZ2*WR1*D->PrCR[0][i1][j1-1]
-             +WZ1*WR2*D->PrCR[0][i1-1][j1]
-             +WZ2*WR2*D->PrCR[0][i1][j1];
-           Pl=WZ1*WR1*D->PlCR[0][i1-1][j1-1]
-             +WZ2*WR1*D->PlCR[0][i1][j1-1]
-             +WZ1*WR2*D->PlCR[0][i1-1][j1]
-             +WZ2*WR2*D->PlCR[0][i1][j1];
-           Sr=WZ1*WR1*D->SrCR[0][i1-1][j1-1]
-             +WZ2*WR1*D->SrCR[0][i1][j1-1]
-             +WZ1*WR2*D->SrCR[0][i1-1][j1]
-             +WZ2*WR2*D->SrCR[0][i1][j1];
-           Sl=WZ1*WR1*D->SlCR[0][i1-1][j1-1]
-             +WZ2*WR1*D->SlCR[0][i1][j1-1]
-             +WZ1*WR2*D->SlCR[0][i1-1][j1]
-             +WZ2*WR2*D->SlCR[0][i1][j1];
+           Ez=wz1*wr1*D->EzR[0][i][j]
+             +wz2*wr1*D->EzR[0][i+1][j]
+             +wz1*wr2*D->EzR[0][i][j+1]
+             +wz2*wr2*D->EzR[0][i+1][j+1];
+           Bz=wz1*wr1*D->BzR[0][i][j]
+             +wz2*wr1*D->BzR[0][i+1][j]
+             +wz1*wr2*D->BzR[0][i][j+1]
+             +wz2*wr2*D->BzR[0][i+1][j+1];
+           Pr=WZ1*WR1*D->PrR[0][i1-1][j1-1]
+             +WZ2*WR1*D->PrR[0][i1][j1-1]
+             +WZ1*WR2*D->PrR[0][i1-1][j1]
+             +WZ2*WR2*D->PrR[0][i1][j1];
+           Pl=WZ1*WR1*D->PlR[0][i1-1][j1-1]
+             +WZ2*WR1*D->PlR[0][i1][j1-1]
+             +WZ1*WR2*D->PlR[0][i1-1][j1]
+             +WZ2*WR2*D->PlR[0][i1][j1];
+           Sr=WZ1*WR1*D->SrR[0][i1-1][j1-1]
+             +WZ2*WR1*D->SrR[0][i1][j1-1]
+             +WZ1*WR2*D->SrR[0][i1-1][j1]
+             +WZ2*WR2*D->SrR[0][i1][j1];
+           Sl=WZ1*WR1*D->SlR[0][i1-1][j1-1]
+             +WZ2*WR1*D->SlR[0][i1][j1-1]
+             +WZ1*WR2*D->SlR[0][i1-1][j1]
+             +WZ2*WR2*D->SlR[0][i1][j1];
            for(m=1; m<numMode; m++) {
-             Ez+=((wz1*wr1*D->EzCR[m][i][j]
-                  +wz2*wr1*D->EzCR[m][i+1][j]
-                  +wz1*wr2*D->EzCR[m][i][j+1]
-                  +wz2*wr2*D->EzCR[m][i+1][j+1])*coss[m]
-                 -(wz1*wr1*D->EzCI[m][i][j]
-                  +wz2*wr1*D->EzCI[m][i+1][j]
-                  +wz1*wr2*D->EzCI[m][i][j+1]
-                  +wz2*wr2*D->EzCI[m][i+1][j+1])*sins[m]);
-             Bz+=((wz1*wr1*D->BzCR[m][i][j]
-                  +wz2*wr1*D->BzCR[m][i+1][j]
-                  +wz1*wr2*D->BzCR[m][i][j+1]
-                  +wz2*wr2*D->BzCR[m][i+1][j+1])*coss[m]
-                 -(wz1*wr1*D->BzCI[m][i][j]
-                  +wz2*wr1*D->BzCI[m][i+1][j]
-                  +wz1*wr2*D->BzCI[m][i][j+1]
-                  +wz2*wr2*D->BzCI[m][i+1][j+1])*sins[m]);
-             Pr+=((WZ1*WR1*D->PrCR[m][i1-1][j1-1]
-                  +WZ2*WR1*D->PrCR[m][i1][j1-1]
-                  +WZ1*WR2*D->PrCR[m][i1-1][j1]
-                  +WZ2*WR2*D->PrCR[m][i1][j1])*coss[m]
-                 -(WZ1*WR1*D->PrCI[m][i1-1][j1-1]
-                  +WZ2*WR1*D->PrCI[m][i1][j1-1]
-                  +WZ1*WR2*D->PrCI[m][i1-1][j1]
-                  +WZ2*WR2*D->PrCI[m][i1][j1])*sins[m]);
-             Pl+=((WZ1*WR1*D->PlCR[m][i1-1][j1-1]
-                  +WZ2*WR1*D->PlCR[m][i1][j1-1]
-                  +WZ1*WR2*D->PlCR[m][i1-1][j1]
-                  +WZ2*WR2*D->PlCR[m][i1][j1])*coss[m]
-                 -(WZ1*WR1*D->PlCI[m][i1-1][j1-1]
-                  +WZ2*WR1*D->PlCI[m][i1][j1-1]
-                  +WZ1*WR2*D->PlCI[m][i1-1][j1]
-                  +WZ2*WR2*D->PlCI[m][i1][j1])*sins[m]);
-             Sr+=((WZ1*WR1*D->SrCR[m][i1-1][j1-1]
-                  +WZ2*WR1*D->SrCR[m][i1][j1-1]
-                  +WZ1*WR2*D->SrCR[m][i1-1][j1]
-                  +WZ2*WR2*D->SrCR[m][i1][j1])*coss[m]
-                 -(WZ1*WR1*D->SrCI[m][i1-1][j1-1]
-                  +WZ2*WR1*D->SrCI[m][i1][j1-1]
-                  +WZ1*WR2*D->SrCI[m][i1-1][j1]
-                  +WZ2*WR2*D->SrCI[m][i1][j1])*sins[m]);
-             Sl+=((WZ1*WR1*D->SlCR[m][i1-1][j1-1]
-                  +WZ2*WR1*D->SlCR[m][i1][j1-1]
-                  +WZ1*WR2*D->SlCR[m][i1-1][j1]
-                  +WZ2*WR2*D->SlCR[m][i1][j1])*coss[m]
-                 -(WZ1*WR1*D->SlCI[m][i1-1][j1-1]
-                  +WZ2*WR1*D->SlCI[m][i1][j1-1]
-                  +WZ1*WR2*D->SlCI[m][i1-1][j1]
-                  +WZ2*WR2*D->SlCI[m][i1][j1])*sins[m]);
+             Ez+=((wz1*wr1*D->EzR[m][i][j]
+                  +wz2*wr1*D->EzR[m][i+1][j]
+                  +wz1*wr2*D->EzR[m][i][j+1]
+                  +wz2*wr2*D->EzR[m][i+1][j+1])*coss[m]
+                 -(wz1*wr1*D->EzI[m][i][j]
+                  +wz2*wr1*D->EzI[m][i+1][j]
+                  +wz1*wr2*D->EzI[m][i][j+1]
+                  +wz2*wr2*D->EzI[m][i+1][j+1])*sins[m]);
+             Bz+=((wz1*wr1*D->BzR[m][i][j]
+                  +wz2*wr1*D->BzR[m][i+1][j]
+                  +wz1*wr2*D->BzR[m][i][j+1]
+                  +wz2*wr2*D->BzR[m][i+1][j+1])*coss[m]
+                 -(wz1*wr1*D->BzI[m][i][j]
+                  +wz2*wr1*D->BzI[m][i+1][j]
+                  +wz1*wr2*D->BzI[m][i][j+1]
+                  +wz2*wr2*D->BzI[m][i+1][j+1])*sins[m]);
+             Pr+=((WZ1*WR1*D->PrR[m][i1-1][j1-1]
+                  +WZ2*WR1*D->PrR[m][i1][j1-1]
+                  +WZ1*WR2*D->PrR[m][i1-1][j1]
+                  +WZ2*WR2*D->PrR[m][i1][j1])*coss[m]
+                 -(WZ1*WR1*D->PrI[m][i1-1][j1-1]
+                  +WZ2*WR1*D->PrI[m][i1][j1-1]
+                  +WZ1*WR2*D->PrI[m][i1-1][j1]
+                  +WZ2*WR2*D->PrI[m][i1][j1])*sins[m]);
+             Pl+=((WZ1*WR1*D->PlR[m][i1-1][j1-1]
+                  +WZ2*WR1*D->PlR[m][i1][j1-1]
+                  +WZ1*WR2*D->PlR[m][i1-1][j1]
+                  +WZ2*WR2*D->PlR[m][i1][j1])*coss[m]
+                 -(WZ1*WR1*D->PlI[m][i1-1][j1-1]
+                  +WZ2*WR1*D->PlI[m][i1][j1-1]
+                  +WZ1*WR2*D->PlI[m][i1-1][j1]
+                  +WZ2*WR2*D->PlI[m][i1][j1])*sins[m]);
+             Sr+=((WZ1*WR1*D->SrR[m][i1-1][j1-1]
+                  +WZ2*WR1*D->SrR[m][i1][j1-1]
+                  +WZ1*WR2*D->SrR[m][i1-1][j1]
+                  +WZ2*WR2*D->SrR[m][i1][j1])*coss[m]
+                 -(WZ1*WR1*D->SrI[m][i1-1][j1-1]
+                  +WZ2*WR1*D->SrI[m][i1][j1-1]
+                  +WZ1*WR2*D->SrI[m][i1-1][j1]
+                  +WZ2*WR2*D->SrI[m][i1][j1])*sins[m]);
+             Sl+=((WZ1*WR1*D->SlR[m][i1-1][j1-1]
+                  +WZ2*WR1*D->SlR[m][i1][j1-1]
+                  +WZ1*WR2*D->SlR[m][i1-1][j1]
+                  +WZ2*WR2*D->SlR[m][i1][j1])*coss[m]
+                 -(WZ1*WR1*D->SlI[m][i1-1][j1-1]
+                  +WZ2*WR1*D->SlI[m][i1][j1-1]
+                  +WZ1*WR2*D->SlI[m][i1-1][j1]
+                  +WZ2*WR2*D->SlI[m][i1][j1])*sins[m]);
            }
            Er=(Pr+Pl)*0.5; Bp=(Pr-Pl)*0.5;
            Ep=(Sl+Sr)*0.5; Br=(Sl-Sr)*0.5;
@@ -178,93 +178,141 @@ void interpolation_NDFX_1st(Domain *D,External *Ext)
 
            wz2=z;             wz1=1.0-wz2;
            WZ2=z+0.5-((int)(z+0.5));  WZ1=1.0-WZ2;
-           i1=((int)(i+z+0.5));   j1=jstart+1;
+           i1=((int)(i+z+0.5));
+           j1=((int)(j+r+0.5));
 
-           wr2=r*2.0;             wr1=1.0-wr2;
-           WR2=r;                 WR1=1.0-WR2;
+           wr2=r;                 wr1=1.0-wr2;
+           
+           //Pr,Pl,Sr,Sl
+           if(j1==jstart) {
+             WR2=2.0*r;     WR1=1.0-WR2;
 
-           m=0;
-           Ez=wz1*D->EzCR[m][i][j+1]
-             +wz2*D->EzCR[m][i+1][j+1];
-           Bz=wz1*D->BzCR[m][i][j+1]
-             +wz2*D->BzCR[m][i+1][j+1];
-           Pr=WZ1*WR2*D->PrCR[m][i1-1][j1]
-             +WZ2*WR2*D->PrCR[m][i1][j1];
-           Pl=WZ1*WR2*D->PlCR[m][i1-1][j1]
-             +WZ2*WR2*D->PlCR[m][i1][j1];
-           Sr=WZ1*WR2*D->SrCR[m][i1-1][j1]
-             +WZ2*WR2*D->SrCR[m][i1][j1];
-           Sl=WZ1*WR2*D->SlCR[m][i1-1][j1]
-             +WZ2*WR2*D->SlCR[m][i1][j1];
+             Pr=WZ1*WR2*D->PrR[0][i1-1][j1]
+               +WZ2*WR2*D->PrR[0][i1][j1];
+             Pl=WZ1*WR2*D->PlR[0][i1-1][j1]
+               +WZ2*WR2*D->PlR[0][i1][j1];
+             Sr=WZ1*WR2*D->SrR[0][i1-1][j1]
+               +WZ2*WR2*D->SrR[0][i1][j1];
+             Sl=WZ1*WR2*D->SlR[0][i1-1][j1]
+               +WZ2*WR2*D->SlR[0][i1][j1];
+             m=1;
+             Pr+=((WZ1*D->PrR[m][i1-1][j1]
+                  +WZ2*D->PrR[m][i1][j1])*coss[m]
+                 -(WZ1*D->PrI[m][i1-1][j1]
+                  +WZ2*D->PrI[m][i1][j1])*sins[m]);
+             Pl+=((WZ1*D->PlR[m][i1-1][j1]
+                  +WZ2*D->PlR[m][i1][j1])*coss[m]
+                 -(WZ1*D->PlI[m][i1-1][j1]
+                  +WZ2*D->PlI[m][i1][j1])*sins[m]);
+             Sr+=((WZ1*D->SrR[m][i1-1][j1]
+                  +WZ2*D->SrR[m][i1][j1])*coss[m]
+                 -(WZ1*D->SrI[m][i1-1][j1]
+                  +WZ2*D->SrI[m][i1][j1])*sins[m]);
+             Sl+=((WZ1*D->SlR[m][i1-1][j1]
+                  +WZ2*D->SlR[m][i1][j1])*coss[m]
+                 -(WZ1*D->SlI[m][i1-1][j1]
+                  +WZ2*D->SlI[m][i1][j1])*sins[m]); 
+             for(m=2; m<numMode; m++) {
+               Pr+=((WZ1*WR2*D->PrR[m][i1-1][j1]
+                  +WZ2*WR2*D->PrR[m][i1][j1])*coss[m]
+                 -(WZ1*WR2*D->PrI[m][i1-1][j1]
+                  +WZ2*WR2*D->PrI[m][i1][j1])*sins[m]);
+               Pl+=((WZ1*WR2*D->PlR[m][i1-1][j1]
+                  +WZ2*WR2*D->PlR[m][i1][j1])*coss[m]
+                 -(WZ1*WR2*D->PlI[m][i1-1][j1]
+                  +WZ2*WR2*D->PlI[m][i1][j1])*sins[m]);
+               Sr+=((WZ1*WR2*D->SrR[m][i1-1][j1]
+                  +WZ2*WR2*D->SrR[m][i1][j1])*coss[m]
+                 -(WZ1*WR2*D->SrI[m][i1-1][j1]
+                  +WZ2*WR2*D->SrI[m][i1][j1])*sins[m]);
+               Sl+=((WZ1*WR2*D->SlR[m][i1-1][j1]
+                  +WZ2*WR2*D->SlR[m][i1][j1])*coss[m]
+                 -(WZ1*WR2*D->SlI[m][i1-1][j1]
+                  +WZ2*WR2*D->SlI[m][i1][j1])*sins[m]);
+             }
+           } else {
+             WR2=r+0.5-((int)(r+0.5));  WR1=1.0-WR2;
 
-           m=1;
-           Ez+=((wz1*wr2*D->EzCR[m][i][j+1]
-                +wz2*wr2*D->EzCR[m][i+1][j+1])*coss[m]
-               -(wz1*wr2*D->EzCI[m][i][j+1]
-                +wz2*wr2*D->EzCI[m][i+1][j+1])*sins[m]);
-           Bz+=((wz1*wr2*D->BzCR[m][i][j+1]
-                +wz2*wr2*D->BzCR[m][i+1][j+1])*coss[m]
-               -(wz1*wr2*D->BzCI[m][i][j+1]
-                +wz2*wr2*D->BzCI[m][i+1][j+1])*sins[m]);
-           Pr+=((WZ1*WR1*D->PrCR[m][i1-1][j1-1]
-                +WZ2*WR1*D->PrCR[m][i1][j1-1]
-                +WZ1*WR2*D->PrCR[m][i1-1][j1]
-                +WZ2*WR2*D->PrCR[m][i1][j1])*coss[m]
-               -(WZ1*WR1*D->PrCI[m][i1-1][j1-1]
-                +WZ2*WR1*D->PrCI[m][i1][j1-1]
-                +WZ1*WR2*D->PrCI[m][i1-1][j1]
-                +WZ2*WR2*D->PrCI[m][i1][j1])*sins[m]);
-           Pl+=((WZ1*WR1*D->PlCR[m][i1-1][j1-1]
-                +WZ2*WR1*D->PlCR[m][i1][j1-1]
-                +WZ1*WR2*D->PlCR[m][i1-1][j1]
-                +WZ2*WR2*D->PlCR[m][i1][j1])*coss[m]
-               -(WZ1*WR1*D->PlCI[m][i1-1][j1-1]
-                +WZ2*WR1*D->PlCI[m][i1][j1-1]
-                +WZ1*WR2*D->PlCI[m][i1-1][j1]
-                +WZ2*WR2*D->PlCI[m][i1][j1])*sins[m]);
-           Sr+=((WZ1*WR1*D->SrCR[m][i1-1][j1-1]
-                +WZ2*WR1*D->SrCR[m][i1][j1-1]
-                +WZ1*WR2*D->SrCR[m][i1-1][j1]
-                +WZ2*WR2*D->SrCR[m][i1][j1])*coss[m]
-               -(WZ1*WR1*D->SrCI[m][i1-1][j1-1]
-                +WZ2*WR1*D->SrCI[m][i1][j1-1]
-                +WZ1*WR2*D->SrCI[m][i1-1][j1]
-                +WZ2*WR2*D->SrCI[m][i1][j1])*sins[m]);
-           Sl+=((WZ1*WR1*D->SlCR[m][i1-1][j1-1]
-                +WZ2*WR1*D->SlCR[m][i1][j1-1]
-                +WZ1*WR2*D->SlCR[m][i1-1][j1]
-                +WZ2*WR2*D->SlCR[m][i1][j1])*coss[m]
-               -(WZ1*WR1*D->SlCI[m][i1-1][j1-1]
-                +WZ2*WR1*D->SlCI[m][i1][j1-1]
-                +WZ1*WR2*D->SlCI[m][i1-1][j1]
-                +WZ2*WR2*D->SlCI[m][i1][j1])*sins[m]);
- 
-           for(m=2; m<numMode; m++) {
-             Ez+=((wz1*D->EzCR[m][i][j+1]
-                  +wz2*D->EzCR[m][i+1][j+1])*coss[m]
-                 -(wz1*D->EzCI[m][i][j+1]
-                  +wz2*D->EzCI[m][i+1][j+1])*sins[m]);
-             Bz+=((wz1*D->BzCR[m][i][j+1]
-                  +wz2*D->BzCR[m][i+1][j+1])*coss[m]
-                 -(wz1*D->BzCI[m][i][j+1]
-                  +wz2*D->BzCI[m][i+1][j+1])*sins[m]);
-             Pr+=((WZ1*WR2*D->PrCR[m][i1-1][j1]
-                  +WZ2*WR2*D->PrCR[m][i1][j1])*coss[m]
-                 -(WZ1*WR2*D->PrCI[m][i1-1][j1]
-                  +WZ2*WR2*D->PrCI[m][i1][j1])*sins[m]);
-             Pl+=((WZ1*WR2*D->PlCR[m][i1-1][j1]
-                  +WZ2*WR2*D->PlCR[m][i1][j1])*coss[m]
-                 -(WZ1*WR2*D->PlCI[m][i1-1][j1]
-                  +WZ2*WR2*D->PlCI[m][i1][j1])*sins[m]);
-             Sr+=((WZ1*WR2*D->SrCR[m][i1-1][j1]
-                  +WZ2*WR2*D->SrCR[m][i1][j1])*coss[m]
-                 -(WZ1*WR2*D->SrCI[m][i1-1][j1]
-                  +WZ2*WR2*D->SrCI[m][i1][j1])*sins[m]);
-             Sl+=((WZ1*WR2*D->SlCR[m][i1-1][j1]
-                  +WZ2*WR2*D->SlCR[m][i1][j1])*coss[m]
-                 -(WZ1*WR2*D->SlCI[m][i1-1][j1]
-                  +WZ2*WR2*D->SlCI[m][i1][j1])*sins[m]);
+             Pr=WZ1*WR1*D->PrR[0][i1-1][j1-1]
+               +WZ2*WR1*D->PrR[0][i1][j1-1]
+               +WZ1*WR2*D->PrR[0][i1-1][j1]
+               +WZ2*WR2*D->PrR[0][i1][j1];
+             Pl=WZ1*WR1*D->PlR[0][i1-1][j1-1]
+               +WZ2*WR1*D->PlR[0][i1][j1-1]
+               +WZ1*WR2*D->PlR[0][i1-1][j1]
+               +WZ2*WR2*D->PlR[0][i1][j1];
+             Sr=WZ1*WR1*D->SrR[0][i1-1][j1-1]
+               +WZ2*WR1*D->SrR[0][i1][j1-1]
+               +WZ1*WR2*D->SrR[0][i1-1][j1]
+               +WZ2*WR2*D->SrR[0][i1][j1];
+             Sl=WZ1*WR1*D->SlR[0][i1-1][j1-1]
+               +WZ2*WR1*D->SlR[0][i1][j1-1]
+               +WZ1*WR2*D->SlR[0][i1-1][j1]
+               +WZ2*WR2*D->SlR[0][i1][j1];
+             for(m=1; m<numMode; m++) {
+               Pr+=((WZ1*WR1*D->PrR[m][i1-1][j1-1]
+                  +WZ2*WR1*D->PrR[m][i1][j1-1]
+                  +WZ1*WR2*D->PrR[m][i1-1][j1]
+                  +WZ2*WR2*D->PrR[m][i1][j1])*coss[m]
+                 -(WZ1*WR1*D->PrI[m][i1-1][j1-1]
+                  +WZ2*WR1*D->PrI[m][i1][j1-1]
+                  +WZ1*WR2*D->PrI[m][i1-1][j1]
+                  +WZ2*WR2*D->PrI[m][i1][j1])*sins[m]);
+               Pl+=((WZ1*WR1*D->PlR[m][i1-1][j1-1]
+                  +WZ2*WR1*D->PlR[m][i1][j1-1]
+                  +WZ1*WR2*D->PlR[m][i1-1][j1]
+                  +WZ2*WR2*D->PlR[m][i1][j1])*coss[m]
+                 -(WZ1*WR1*D->PlI[m][i1-1][j1-1]
+                  +WZ2*WR1*D->PlI[m][i1][j1-1]
+                  +WZ1*WR2*D->PlI[m][i1-1][j1]
+                  +WZ2*WR2*D->PlI[m][i1][j1])*sins[m]);
+               Sr+=((WZ1*WR1*D->SrR[m][i1-1][j1-1]
+                  +WZ2*WR1*D->SrR[m][i1][j1-1]
+                  +WZ1*WR2*D->SrR[m][i1-1][j1]
+                  +WZ2*WR2*D->SrR[m][i1][j1])*coss[m]
+                 -(WZ1*WR1*D->SrI[m][i1-1][j1-1]
+                  +WZ2*WR1*D->SrI[m][i1][j1-1]
+                  +WZ1*WR2*D->SrI[m][i1-1][j1]
+                  +WZ2*WR2*D->SrI[m][i1][j1])*sins[m]);
+               Sl+=((WZ1*WR1*D->SlR[m][i1-1][j1-1]
+                  +WZ2*WR1*D->SlR[m][i1][j1-1]
+                  +WZ1*WR2*D->SlR[m][i1-1][j1]
+                  +WZ2*WR2*D->SlR[m][i1][j1])*coss[m]
+                 -(WZ1*WR1*D->SlI[m][i1-1][j1-1]
+                  +WZ2*WR1*D->SlI[m][i1][j1-1]
+                  +WZ1*WR2*D->SlI[m][i1-1][j1]
+                  +WZ2*WR2*D->SlI[m][i1][j1])*sins[m]);
+             }
            }
+
+           //Ex, Bx
+           Ez=wz1*wr1*D->EzR[0][i][j]
+             +wz2*wr1*D->EzR[0][i+1][j]
+             +wz1*wr2*D->EzR[0][i][j+1]
+             +wz2*wr2*D->EzR[0][i+1][j+1];
+           Bz=wz1*wr1*D->BzR[0][i][j]
+             +wz2*wr1*D->BzR[0][i+1][j]
+             +wz1*wr2*D->BzR[0][i][j+1]
+             +wz2*wr2*D->BzR[0][i+1][j+1];
+           for(m=1; m<numMode; m++) {
+             Ez+=((wz1*wr1*D->EzR[m][i][j]
+                  +wz2*wr1*D->EzR[m][i+1][j]
+                  +wz1*wr2*D->EzR[m][i][j+1]
+                  +wz2*wr2*D->EzR[m][i+1][j+1])*coss[m]
+                 -(wz1*wr1*D->EzI[m][i][j]
+                  +wz2*wr1*D->EzI[m][i+1][j]
+                  +wz1*wr2*D->EzI[m][i][j+1]
+                  +wz2*wr2*D->EzI[m][i+1][j+1])*sins[m]);
+             Bz+=((wz1*wr1*D->BzR[m][i][j]
+                  +wz2*wr1*D->BzR[m][i+1][j]
+                  +wz1*wr2*D->BzR[m][i][j+1]
+                  +wz2*wr2*D->BzR[m][i+1][j+1])*coss[m]
+                 -(wz1*wr1*D->BzI[m][i][j]
+                  +wz2*wr1*D->BzI[m][i+1][j]
+                  +wz1*wr2*D->BzI[m][i][j+1]
+                  +wz2*wr2*D->BzI[m][i+1][j+1])*sins[m]);
+           }
+
            Er=(Pr+Pl)*0.5; Bp=(Pr-Pl)*0.5;
            Ep=(Sl+Sr)*0.5; Br=(Sl-Sr)*0.5;
            Ex=Er*coss[1]-Ep*sins[1];
@@ -283,11 +331,11 @@ void interpolation_NDFX_1st(Domain *D,External *Ext)
 
 void interpolation_Yee_1st(Domain *D,External *Ext)
 {
-   int i,j,m,i1,j1,istart,iend,jstart,jend,s,rank,numMode;
+   int i,j,m,i1,j1,ii,jj,istart,iend,jstart,jend,s,rank,numMode;
    double Bz,Br,Bp,Bx,By,Ez,Er,Ep,Ex,Ey,yR1,yR2,yI1,yI2;
    double coss[D->numMode],sins[D->numMode];
    double extE1,extE2,extE3,extB1,extB2,extB3,x,y,z,R,r,invR;
-   double wz1,wz2,wr1,wr2,WZ1,WZ2,WR1,WR2;
+   double wz[2],wr[2],WZ[2],WR[2];
    ptclList *p;
    int myrank, nprocs;    
 
@@ -313,14 +361,14 @@ void interpolation_Yee_1st(Domain *D,External *Ext)
          while(p) {
            z=p->z;  x=p->x; y=p->y;
            R=sqrt(x*x+y*y); invR=1.0/R;
-           r=R+0.5-(j-jstart);
-
-           wz2=z;             wz1=1.0-wz2;
-           wr2=r;             wr1=1.0-wr2;
+           r=R-(j-jstart);
+//lala
+           wz[1]=z;           wz[0]=1.0-wz[1];
+           wr[1]=r;           wr[0]=1.0-wr[1];
            i1=((int)(i+z+0.5));
            j1=((int)(j+r+0.5));
-           WZ2=z+0.5-((int)(z+0.5));  WZ1=1.0-WZ2;
-           WR2=r+0.5-((int)(r+0.5));  WR1=1.0-WR2;
+           WZ[1]=z+0.5-((int)(z+0.5));  WZ[0]=1.0-WZ[1];
+           WR[1]=r+0.5-((int)(r+0.5));  WR[0]=1.0-WR[1];
 
            coss[0]=1.0; sins[0]=0.0;
            coss[1]=x*invR; sins[1]=y*invR;
@@ -329,80 +377,33 @@ void interpolation_Yee_1st(Domain *D,External *Ext)
              sins[m]=sins[m-1]*coss[1]+coss[m-1]*sins[1];
            }
 
-           Bz=wz1*WR1*D->BzNowR[0][i][j1-1]
-             +wz2*WR1*D->BzNowR[0][i+1][j1-1]
-             +wz1*WR2*D->BzNowR[0][i][j1]
-             +wz2*WR2*D->BzNowR[0][i+1][j1];
-           Br=WZ1*wr1*D->BrNowR[0][i1-1][j]
-             +WZ2*wr1*D->BrNowR[0][i1][j]
-             +WZ1*wr2*D->BrNowR[0][i1-1][j+1]
-             +WZ2*wr2*D->BrNowR[0][i1][j+1];
-           Bp=WZ1*WR1*D->BpNowR[0][i1-1][j1-1]
-             +WZ2*WR1*D->BpNowR[0][i1][j1-1]
-             +WZ1*WR2*D->BpNowR[0][i1-1][j1]
-             +WZ2*WR2*D->BpNowR[0][i1][j1];
-           Ez=WZ1*wr1*D->EzR[0][i1-1][j]
-             +WZ2*wr1*D->EzR[0][i1][j]
-             +WZ1*wr2*D->EzR[0][i1-1][j+1]
-             +WZ2*wr2*D->EzR[0][i1][j+1];
-           Er=wz1*WR1*D->ErR[0][i][j1-1]
-             +wz2*WR1*D->ErR[0][i+1][j1-1]
-             +wz1*WR2*D->ErR[0][i][j1]
-             +wz2*WR2*D->ErR[0][i+1][j1];
-           Ep=wz1*wr1*D->EpR[0][i][j]
-             +wz2*wr1*D->EpR[0][i+1][j]
-             +wz1*wr2*D->EpR[0][i][j+1]
-             +wz2*wr2*D->EpR[0][i+1][j+1];
+           Bz=Br=Bp=Ez=Er=Ep=0.0;
+           for(ii=0; ii<2; ii++)
+             for(jj=0; jj<2; jj++) {
+               Bz+=wz[ii]*WR[jj]*D->BzNowR[0][i+ii][j1-1+jj];
+               Br+=WZ[ii]*wr[jj]*D->BrNowR[0][i1-1+ii][j+jj];
+               Bp+=WZ[ii]*WR[jj]*D->BpNowR[0][i1-1+ii][j1-1+jj];
+               Ez+=WZ[ii]*wr[jj]*D->EzR[0][i1-1+ii][j+jj];
+               Er+=wz[ii]*WR[jj]*D->ErR[0][i+ii][j1-1+jj];
+               Ep+=wz[ii]*wr[jj]*D->EpR[0][i+ii][j+jj];
+             }
 
            for(m=1; m<numMode; m++) {
-             Bz+=((wz1*WR1*D->BzNowR[m][i][j1-1]
-                  +wz2*WR1*D->BzNowR[m][i+1][j1-1]
-                  +wz1*WR2*D->BzNowR[m][i][j1]
-                  +wz2*WR2*D->BzNowR[m][i+1][j1])*coss[m]
-                 -(wz1*WR1*D->BzNowI[m][i][j1-1]
-                  +wz2*WR1*D->BzNowI[m][i+1][j1-1]
-                  +wz1*WR2*D->BzNowI[m][i][j1]
-                  +wz2*WR2*D->BzNowI[m][i+1][j1])*sins[m]);
-             Br+=((WZ1*wr1*D->BrNowR[m][i1-1][j]
-                  +WZ2*wr1*D->BrNowR[m][i1][j]
-                  +WZ1*wr2*D->BrNowR[m][i1-1][j+1]
-                  +WZ2*wr2*D->BrNowR[m][i1][j+1])*coss[m]
-                 -(WZ1*wr1*D->BrNowI[m][i1-1][j]
-                  +WZ2*wr1*D->BrNowI[m][i1][j]
-                  +WZ1*wr2*D->BrNowI[m][i1-1][j+1]
-                  +WZ2*wr2*D->BrNowI[m][i1][j+1])*sins[m]);
-             Bp+=((WZ1*WR1*D->BpNowR[m][i1-1][j1-1]
-                  +WZ2*WR1*D->BpNowR[m][i1][j1-1]
-                  +WZ1*WR2*D->BpNowR[m][i1-1][j1]
-                  +WZ2*WR2*D->BpNowR[m][i1][j1])*coss[m]
-                 -(WZ1*WR1*D->BpNowI[m][i1-1][j1-1]
-                  +WZ2*WR1*D->BpNowI[m][i1][j1-1]
-                  +WZ1*WR2*D->BpNowI[m][i1-1][j1]
-                  +WZ2*WR2*D->BpNowI[m][i1][j1])*sins[m]);
-             Ez+=((WZ1*wr1*D->EzR[m][i1-1][j]
-                  +WZ2*wr1*D->EzR[m][i1][j]
-                  +WZ1*wr2*D->EzR[m][i1-1][j+1]
-                  +WZ2*wr2*D->EzR[m][i1][j+1])*coss[m]
-                 -(WZ1*wr1*D->EzI[m][i1-1][j]
-                  +WZ2*wr1*D->EzI[m][i1][j]
-                  +WZ1*wr2*D->EzI[m][i1-1][j+1]
-                  +WZ2*wr2*D->EzI[m][i1][j+1])*sins[m]);
-             Er+=((wz1*WR1*D->ErR[m][i][j1-1]
-                  +wz2*WR1*D->ErR[m][i+1][j1-1]
-                  +wz1*WR2*D->ErR[m][i][j1]
-                  +wz2*WR2*D->ErR[m][i+1][j1])*coss[m]
-                 -(wz1*WR1*D->ErI[m][i][j1-1]
-                  +wz2*WR1*D->ErI[m][i+1][j1-1]
-                  +wz1*WR2*D->ErI[m][i][j1]
-                  +wz2*WR2*D->ErI[m][i+1][j1])*sins[m]);
-             Ep+=((wz1*wr1*D->EpR[m][i][j]
-                  +wz2*wr1*D->EpR[m][i+1][j]
-                  +wz1*wr2*D->EpR[m][i][j+1]
-                  +wz2*wr2*D->EpR[m][i+1][j+1])*coss[m]
-                 -(wz1*wr1*D->EpI[m][i][j]
-                  +wz2*wr1*D->EpI[m][i+1][j]
-                  +wz1*wr2*D->EpI[m][i][j+1]
-                  +wz2*wr2*D->EpI[m][i+1][j+1])*sins[m]);
+             for(ii=0; ii<2; ii++)
+               for(jj=0; jj<2; jj++) {
+                 Bz+=wz[ii]*WR[jj]*D->BzNowR[m][i+ii][j1-1+jj]*coss[m];
+                 Bz-=wz[ii]*WR[jj]*D->BzNowI[m][i+ii][j1-1+jj]*sins[m];
+                 Br+=WZ[ii]*wr[jj]*D->BrNowR[m][i1-1+ii][j+jj]*coss[m];
+                 Br-=WZ[ii]*wr[jj]*D->BrNowI[m][i1-1+ii][j+jj]*sins[m];
+                 Bp+=WZ[ii]*WR[jj]*D->BpNowR[m][i1-1+ii][j1-1+jj]*coss[m];
+                 Bp-=WZ[ii]*WR[jj]*D->BpNowI[m][i1-1+ii][j1-1+jj]*sins[m];
+                 Ez+=WZ[ii]*wr[jj]*D->EzR[m][i1-1+ii][j+jj]*coss[m];
+                 Ez-=WZ[ii]*wr[jj]*D->EzI[m][i1-1+ii][j+jj]*sins[m];
+                 Er+=wz[ii]*WR[jj]*D->ErR[m][i+ii][j1-1+jj]*coss[m];
+                 Er-=wz[ii]*WR[jj]*D->ErI[m][i+ii][j1-1+jj]*sins[m];
+                 Ep+=wz[ii]*wr[jj]*D->EpR[m][i+ii][j+jj]*coss[m];
+                 Ep-=wz[ii]*wr[jj]*D->EpI[m][i+ii][j+jj]*sins[m];
+               }
            }
            Ex=Er*coss[1]-Ep*sins[1];
            Ey=Er*sins[1]+Ep*coss[1];
@@ -426,7 +427,7 @@ void interpolation_Yee_1st(Domain *D,External *Ext)
          while(p) {
            z=p->z;  x=p->x; y=p->y;
            R=sqrt(x*x+y*y); invR=1.0/R;
-           r=R+0.5-(j-jstart);
+           r=R-(j-jstart);
 
            coss[0]=1.0; sins[0]=0.0;
            coss[1]=x*invR; sins[1]=y*invR;
@@ -435,112 +436,81 @@ void interpolation_Yee_1st(Domain *D,External *Ext)
              sins[m]=sins[m-1]*coss[1]+coss[m-1]*sins[1];
            }
 
-           wz2=z;             wz1=1.0-wz2;
-           WZ2=z+0.5-((int)(z+0.5));  WZ1=1.0-WZ2;
            i1=((int)(i+z+0.5));
+           j1=((int)(j+r+0.5));
+           wz[1]=z;                     wz[0]=1.0-wz[1];
+           WZ[1]=z+0.5-((int)(z+0.5));  WZ[0]=1.0-WZ[1];
 
-           wr2=(r-0.5)*2.0;             wr1=1.0-wr2;
+           Bz=Br=Bp=Ez=Er=Ep=0.0;
+           //Bz, Bp, Er
+           if(j1==jstart) {
+             WR[1]=R*2.0;                 WR[0]=1.0-WR[1];
+             m=0;
+             for(ii=0; ii<2; ii++) {
+               Bz+=wz[ii]*D->BzNowR[m][i+ii][j];
+               Bp+=WZ[ii]*WR[1]*D->BpNowR[m][i1-1+ii][j];
+               Er+=wz[ii]*WR[1]*D->ErR[m][i+ii][j];
+             }
+             m=1;
+             for(ii=0; ii<2; ii++) {
+               Bz+=wz[ii]*WR[1]*D->BzNowR[m][i+ii][j]*coss[m];
+               Bz-=wz[ii]*WR[1]*D->BzNowR[m][i+ii][j]*sins[m];
+               Bp+=WZ[ii]*D->BpNowR[m][i1-1+ii][j]*coss[m];
+               Bp-=WZ[ii]*D->BpNowR[m][i1-1+ii][j]*sins[m];
+               Er+=wz[ii]*D->ErR[m][i+ii][j]*coss[m];
+               Er-=wz[ii]*D->ErR[m][i+ii][j]*sins[m];
+             }
+             for(m=2; m<numMode; m++) 
+               for(ii=0; ii<2; ii++) {
+                 Bz+=wz[ii]*WR[1]*D->BzNowR[m][i+ii][j]*coss[m];
+                 Bz-=wz[ii]*WR[1]*D->BzNowR[m][i+ii][j]*sins[m];
+                 Bp+=WZ[ii]*WR[1]*D->BpNowR[m][i1-1+ii][j]*coss[m];
+                 Bp-=WZ[ii]*WR[1]*D->BpNowR[m][i1-1+ii][j]*sins[m];
+                 Er+=wz[ii]*WR[1]*D->ErR[m][i+ii][j]*coss[m];
+                 Er-=wz[ii]*WR[1]*D->ErR[m][i+ii][j]*sins[m];
+               }
+           } else {
+             WR[1]=r+0.5-((int)(r+0.5));  WR[0]=1.0-WR[1];
 
-           m=0;
-           yR1=D->BrNowR[m][i1-1][j+1];
-           yR2=D->BrNowR[m][i1][j+1];
-           Br=WZ1*wr2*yR1+WZ2*wr2*yR2;
-           yR1=D->EpR[m][i][j+1];
-           yR2=D->EpR[m][i+1][j+1];
-           Ep=wz1*wr2*yR1+wz2*wr2*yR2;
-           yR1=D->EzR[m][i1-1][j+1];
-           yR2=D->EzR[m][i1][j+1];
-           Ez=WZ1*yR1+WZ2*yR2;
-  
-           m=1;
-           yR1=D->BrNowR[m][i1-1][j+1];
-           yR2=D->BrNowR[m][i1][j+1];
-           yI1=D->BrNowI[m][i1-1][j+1];
-           yI2=D->BrNowI[m][i1][j+1];
-           Br+=(WZ1*yR1+WZ2*yR2)*coss[m]-(WZ1*yI1+WZ2*yI2)*sins[m];
-           yR1=D->EpR[m][i][j+1];
-           yR2=D->EpR[m][i+1][j+1];
-           yI1=D->EpI[m][i][j+1];
-           yI2=D->EpI[m][i+1][j+1];
-           Ep+=(wz1*yR1+wz2*yR2)*coss[m]-(wz1*yI1+wz2*yI2)*sins[m];
-           yR1=D->EzR[m][i1-1][j+1];
-           yR2=D->EzR[m][i1][j+1];
-           yI1=D->EzI[m][i1-1][j+1];
-           yI2=D->EzI[m][i1][j+1];
-           Ez+=wr2*(WZ1*yR1+WZ2*yR2)*coss[m]-wr2*(WZ1*yI1+WZ2*yI2)*sins[m];
- 
-           for(m=2; m<numMode; m++) {
-             yR1=D->BrNowR[m][i1-1][j+1];
-             yR2=D->BrNowR[m][i1][j+1];
-             yI1=D->BrNowI[m][i1-1][j+1];
-             yI2=D->BrNowI[m][i1][j+1];
-             Br+=wr2*(WZ1*yR1+WZ2*yR2)*coss[m]-wr2*(WZ1*yI1+WZ2*yI2)*sins[m];
-             yR1=D->EpR[m][i][j+1];
-             yR2=D->EpR[m][i+1][j+1];
-             yI1=D->EpI[m][i][j+1];
-             yI2=D->EpI[m][i+1][j+1];
-             Ep+=wr2*(wz1*yR1+wz2*yR2)*coss[m]-wr2*(wz1*yI1+wz2*yI2)*sins[m];
-             yR1=D->EzR[m][i1-1][j+1];
-             yR2=D->EzR[m][i1][j+1];
-             yI1=D->EzI[m][i1-1][j+1];
-             yI2=D->EzI[m][i1][j+1];
-             Ez+=wr2*(WZ1*yR1+WZ2*yR2)*coss[m]-wr2*(WZ1*yI1+WZ2*yI2)*sins[m];
+             for(ii=0; ii<2; ii++)
+               for(jj=0; jj<2; jj++) {
+                 Bz+=wz[ii]*WR[jj]*D->BzNowR[0][i+ii][j1-1+jj];
+                 Bp+=WZ[ii]*WR[jj]*D->BpNowR[0][i1-1+ii][j1-1+jj];
+                 Er+=wz[ii]*WR[jj]*D->ErR[0][i+ii][j1-1+jj];
+               }
+             for(m=1; m<numMode; m++) {
+               for(ii=0; ii<2; ii++)
+                 for(jj=0; jj<2; jj++) {
+                   Bz+=wz[ii]*WR[jj]*D->BzNowR[m][i+ii][j1-1+jj]*coss[m];
+                   Bz-=wz[ii]*WR[jj]*D->BzNowI[m][i+ii][j1-1+jj]*sins[m];
+                   Bp+=WZ[ii]*WR[jj]*D->BpNowR[m][i1-1+ii][j1-1+jj]*coss[m];
+                   Bp-=WZ[ii]*WR[jj]*D->BpNowI[m][i1-1+ii][j1-1+jj]*sins[m];
+                   Er+=wz[ii]*WR[jj]*D->ErR[m][i+ii][j1-1+jj]*coss[m];
+                   Er-=wz[ii]*WR[jj]*D->ErI[m][i+ii][j1-1+jj]*sins[m];
+                 }
+             }
            }
 
+           //Ez, Ep, Br
+           wr[1]=r;                  wr[0]=1.0-wr[1];
 
-           WR2=(r-0.5);             WR1=1.0-WR2;
+           for(ii=0; ii<2; ii++)
+             for(jj=0; jj<2; jj++) {
+               Br+=WZ[ii]*wr[jj]*D->BrNowR[0][i1-1+ii][j+jj];
+               Ez+=WZ[ii]*wr[jj]*D->EzR[0][i1-1+ii][j+jj];
+               Ep+=wz[ii]*wr[jj]*D->EpR[0][i+ii][j+jj];
+             }
 
-           m=0;
-           yR1=D->ErR[m][i][j+1];
-           yR2=D->ErR[m][i+1][j+1];
-           Er=WR2*wz1*yR1+WR2*wz2*yR2;
-           Bz=WR2*wz1*D->BzNowR[m][i][j+1]
-             +WR2*wz2*D->BzNowR[m][i+1][j+1]
-             +WR1*wz1*D->BzNowR[m][i][j]
-             +WR1*wz2*D->BzNowR[m][i+1][j];
-           yR1=D->BpNowR[m][i1-1][j+1];
-           yR2=D->BpNowR[m][i1][j+1];
-           Bp=WR2*WZ1*yR1+WR2*WZ2*yR2;
-
-           m=1;
-           Er+=(WR1*wz1*D->ErR[m][i][j]
-               +WR1*wz2*D->ErR[m][i+1][j]
-               +WR2*wz1*D->ErR[m][i][j+1]
-               +WR2*wz2*D->ErR[m][i+1][j+1])*coss[m]
-              -(WR1*wz1*D->ErI[m][i][j]
-               +WR1*wz2*D->ErI[m][i+1][j]
-               +WR2*wz1*D->ErI[m][i][j+1]
-               +WR2*wz2*D->ErI[m][i+1][j+1])*sins[m];
-           yR1=D->BzNowR[m][i][j+1];
-           yR2=D->BzNowR[m][i+1][j+1];
-           yI1=D->BzNowI[m][i][j+1];
-           yI2=D->BzNowI[m][i+1][j+1];
-           Bz+=WR2*(wz1*yR1+wz2*yR2)*coss[m]-WR2*(wz1*yI1+wz2*yI2)*sins[m];
-           Bp+=(WR1*WZ1*D->BpNowR[m][i1-1][j]
-               +WR1*WZ2*D->BpNowR[m][i1][j]
-               +WR2*WZ1*D->BpNowR[m][i1-1][j+1]
-               +WR2*WZ2*D->BpNowR[m][i1][j+1])*coss[m]
-              -(WR1*WZ1*D->BpNowI[m][i1-1][j]
-               +WR1*WZ2*D->BpNowI[m][i1][j]
-               +WR2*WZ1*D->BpNowI[m][i1-1][j+1]
-               +WR2*WZ2*D->BpNowI[m][i1][j+1])*sins[m];
-
-           for(m=2; m<numMode; m++) {
-             yR1=D->ErR[m][i][j+1];
-             yR2=D->ErR[m][i+1][j+1];
-             yI1=D->ErI[m][i][j+1];
-             yI2=D->ErI[m][i+1][j+1];
-             Er+=WR2*(wz1*yR1+wz2*yR2)*coss[m]-WR2*(wz1*yI1+wz2*yI2)*sins[m];
-             yR1=D->BzNowR[m][i][j+1];
-             yR2=D->BzNowR[m][i+1][j+1];
-             yI1=D->BzNowI[m][i][j+1];
-             yI2=D->BzNowI[m][i+1][j+1];
-             Bz+=WR2*(wz1*yR1+wz2*yR2)*coss[m]-WR2*(wz1*yI1+wz2*yI2)*sins[m];
-             yR1=D->BpNowR[m][i1-1][j+1];
-             yR2=D->BpNowR[m][i1][j+1];
-             yI1=D->BpNowI[m][i1-1][j+1];
-             yI2=D->BpNowI[m][i1][j+1];
-             Bp+=WR2*(WZ1*yR1+WZ2*yR2)*coss[m]-WR2*(WZ1*yI1+WZ2*yI2)*sins[m];
+           for(m=1; m<numMode; m++) {
+             for(ii=0; ii<2; ii++)
+               for(jj=0; jj<2; jj++) {
+                 Br+=WZ[ii]*wr[jj]*D->BrNowR[m][i1-1+ii][j+jj]*coss[m];
+                 Br-=WZ[ii]*wr[jj]*D->BrNowI[m][i1-1+ii][j+jj]*sins[m];
+                 Ez+=WZ[ii]*wr[jj]*D->EzR[m][i1-1+ii][j+jj]*coss[m];
+                 Ez-=WZ[ii]*wr[jj]*D->EzI[m][i1-1+ii][j+jj]*sins[m];
+                 Ep+=wz[ii]*wr[jj]*D->EpR[m][i+ii][j+jj]*coss[m];
+                 Ep-=wz[ii]*wr[jj]*D->EpI[m][i+ii][j+jj]*sins[m];
+               }
            }
            Ex=Er*coss[1]-Ep*sins[1];
            Ey=Er*sins[1]+Ep*coss[1];

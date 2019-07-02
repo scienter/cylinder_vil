@@ -132,6 +132,8 @@ void cleanMemory(Domain *D)
       deleteField(D->RhoPairI,numMode,nxSub,nySub);
       deleteField(D->FR,numMode,nxSub,nySub);
       deleteField(D->FI,numMode,nxSub,nySub);
+      deleteField(D->CnR,numMode,nxSub,nySub);
+      deleteField(D->CnI,numMode,nxSub,nySub);
 //      if(D->pmlUp==ON)
 //        deleteField(D->upml,numMode,nxSub,D->pmlCellUp);
 //      else ;
@@ -182,6 +184,8 @@ void cleanMemory(Domain *D)
       deleteField(D->RhoPairI,numMode,nxSub,nySub);
       deleteField(D->FR,numMode,nxSub,nySub);
       deleteField(D->FI,numMode,nxSub,nySub);
+      deleteField(D->CnR,numMode,nxSub,nySub);
+      deleteField(D->CnI,numMode,nxSub,nySub);
       break;
     }
 

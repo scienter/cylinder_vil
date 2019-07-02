@@ -61,7 +61,10 @@ int main(int argc, char *argv[])
       restoreDump(D,iteration);
       t=D.dt*iteration;
       sprintf(name,"dumpField%d.h5",iteration);
-      restoreIntMeta(name,"/minXDomain",&(D.minXDomain),1);
+      if(myrank==0) restoreIntMeta(name,"/minXDomain",&(D.minXDomain),1);
+      else ;
+      MPI_Bcast(&(D.minXDomain),1,MPI_INT,0,MPI_COMM_WORLD);
+      MPI_Barrier(MPI_COMM_WORLD);
       D.maxXDomain=D.minXDomain+D.nx;
       D.minXSub+=D.minXDomain;
     }  else   {
@@ -120,31 +123,22 @@ int main(int argc, char *argv[])
        MPI_Barrier(MPI_COMM_WORLD);
 
        //redistributing particles lala
-//       if(D.redist==ON && iteration>0) {
-//         particle_redist(&D,iteration,&Ext);
-//         if(myrank==0) printf("redistriubuting,iteration=%d\n",iteration); 
-//       } else ;
-
+//       if(D.redist==ON && iteration>0) particle_redist(&D,iteration,&Ext); else;
        fieldSolve1(D,t,iteration,dF);
-//       MPI_Barrier(MPI_COMM_WORLD);
-//if(myrank==0) printf("fieldSolve1,iteration=%d\n",iteration);
+//printf("fieldSolve1,iteration=%d\n",iteration);
 
        //filter
-       interpolation(&D,&Ext);
-//if(myrank==0) printf("myrank=%d,interpolation,iteration=%d\n",myrank,iteration);
-//       MPI_Barrier(MPI_COMM_WORLD);
-//if(myrank==0) printf("myrank=%d,interpolation,iteration=%d\n",myrank,iteration);
-
-       if(D.fieldIonization==ON) fieldIonization(&D); else;
-       MPI_Barrier(MPI_COMM_WORLD);
-//if(myrank==0) printf("fieldIonization, iteration=%d\n",iteration);
+       interpolation(&D,&Ext,iteration);
+//printf("interpolation,iteration=%d\n",iteration);
 
        particlePush(&D,iteration);
-//if(myrank==0) printf("particle Push,iteration=%d\n",iteration);
+//printf("particle Push,iteration=%d\n",iteration);
 
+       if(D.fieldIonization==ON) fieldIonization(&D); else;
 
        updateCurrent(D,iteration);
-//if(myrank==0) printf("current,iteration=%d\n",iteration);
+//printf("current,iteration=%d\n",iteration);
+//       calConservation(D,iteration);
 
        if(D.moveIt==ON) {
          if(iteration%D.shiftDuration!=0)    {

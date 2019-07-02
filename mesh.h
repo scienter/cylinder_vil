@@ -104,7 +104,7 @@ typedef struct _Domain
 
    int numMode;
    double dF;
-   double ***FR,***FI;
+   double ***FR,***FI,***CnR,***CnI;
    //Yee
    double ***RhoNoPairR,***RhoNoPairI,***RhoPairR,***RhoPairI;
    double ***EzR,***ErR,***EpR,***BzR,***BrR,***BpR;    
@@ -248,7 +248,7 @@ void rearrangeParticles(Domain *D);
 void movingDomain(Domain *D,int iteration);
 void updateCurrent(Domain D,int iteration);
 void particlePush(Domain *D,int iteration);
-void interpolation(Domain *D,External *Ext);
+void interpolation(Domain *D,External *Ext,int iteration);
 void fieldSolve1(Domain D,double t,int iteration,double dF);
 void fieldSolve2(Domain D,double t,int iteration,double dF);
 void loadLaser(Domain *D,LaserList *L,double t);
@@ -295,4 +295,7 @@ void MPI_Transfer8F_Xminus(Domain *D,double ***f1,double ***f2,double ***f3,doub
 void MPI_Transfer8F_Xplus(Domain *D,double ***f1,double ***f2,double ***f3,double ***f4,double ***f5,double ***f6,double ***f7,double ***f8,int ny,int share);
 void MPI_Transfer12F_Xminus(Domain *D,double ***f1,double ***f2,double ***f3,double ***f4,double ***f5,double ***f6,double ***f7,double ***f8,double ***f9,double ***f10,double ***f11,double ***f12,int ny,int share);
 void MPI_Transfer12F_Xplus(Domain *D,double ***f1,double ***f2,double ***f3,double ***f4,double ***f5,double ***f6,double ***f7,double ***f8,double ***f9,double ***f10,double ***f11,double ***f12,int ny,int share);
+void MPI_TransferDen_Xplus(Domain *D,double ***f1,double ***f2,int ny,int share);
+void MPI_TransferDen_Xminus(Domain *D,double ***f1,double ***f2,int ny,int share);
+void calConservation(Domain D,int iteration);
 

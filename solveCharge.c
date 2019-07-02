@@ -274,9 +274,9 @@ void solveCharge(Domain *D,LoadList *LL,double ***rhoR,double ***rhoI,int istart
           weight=coef*p->weight*rho0*p->charge;
           z=p->z; x=p->x; y=p->y;
           r=sqrt(x*x+y*y);   invR=1.0/r;
-          index=j-jstart+1;
+          index=j-jstart;
 
-          Wr[0]=(index*index-r*r)/(2.0*index-1.0);
+          Wr[0]=((index+1)*(index+1)-r*r)/(2.0*index+1.0);
           Wr[1]=1.0-Wr[0];
           Wz[1]=z-(int)(z);              Wz[0]=1.0-Wz[1];
 
@@ -286,7 +286,7 @@ void solveCharge(Domain *D,LoadList *LL,double ***rhoR,double ***rhoI,int istart
             sins[m]=sins[m-1]*coss[1]+coss[m-1]*sins[1];
           }
 
-          factor=weight/(2.0*r);
+          factor=weight/(index+0.5);
           for(ii=0; ii<2; ii++)
             for(jj=0; jj<2; jj++) {
 //              factor=weight/(2.0*(j+jj-jstart));
@@ -309,7 +309,7 @@ void solveCharge(Domain *D,LoadList *LL,double ***rhoR,double ***rhoI,int istart
           weight=coef*p->weight*rho0*p->charge;
           z=p->z; x=p->x; y=p->y;
           r=sqrt(x*x+y*y);   invR=1.0/r;
-          index=j-jstart+1;
+          index=j-jstart;
 
           coss[1]=x*invR; sins[1]=y*invR;
           for(m=2; m<numMode; m++) {
@@ -317,12 +317,11 @@ void solveCharge(Domain *D,LoadList *LL,double ***rhoR,double ***rhoI,int istart
             sins[m]=sins[m-1]*coss[1]+coss[m-1]*sins[1];
           }
 
-          Wr[0]=(index*index-r*r)/(2.0*index-1.0);
+          Wr[0]=((index+1)*(index+1)-r*r)/(2.0*index+1.0);
           Wr[1]=1.0-Wr[0];
           Wz[1]=z-(int)(z);              Wz[0]=1.0-Wz[1];
 
-          if(r>=0.5) factor=weight/(2.0*r);
-          else       factor=weight/(r*r+r+0.25);
+          factor=weight/(index+0.5);
           jj=0;
 //          factor=weight*4.0;
           for(ii=0; ii<2; ii++) {
@@ -343,5 +342,6 @@ void solveCharge(Domain *D,LoadList *LL,double ***rhoR,double ***rhoI,int istart
           p=p->next;
         }
     }		//End of for(i)
+
 }
 

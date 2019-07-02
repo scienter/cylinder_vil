@@ -89,6 +89,8 @@ void restoreRedistHDF(Domain *D,int iteration,char *partFile,char *fieldFile)
     restoreFieldComp(D->JpI,fieldFile,"/JpI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
     restoreFieldComp(D->RhoPairR,fieldFile,"/RhoPairR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
     restoreFieldComp(D->RhoPairI,fieldFile,"/RhoPairI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
+    restoreFieldComp(D->FR,fieldFile,"/FR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
+    restoreFieldComp(D->FI,fieldFile,"/FI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
     if(D->fieldType!=NDFX) {
       restoreFieldComp(D->ErR,fieldFile,"/ErR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
       restoreFieldComp(D->ErI,fieldFile,"/ErI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
@@ -484,8 +486,6 @@ void restoreDumpHDF(Domain *D,int iteration,char *partFile,char *fieldFile)
       
     restoreFieldComp(D->EzR,fieldFile,"/EzR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
     restoreFieldComp(D->EzI,fieldFile,"/EzI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
-    restoreFieldComp(D->BzR,fieldFile,"/BzR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
-    restoreFieldComp(D->BzI,fieldFile,"/BzI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
     restoreFieldComp(D->JzR,fieldFile,"/JzR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
     restoreFieldComp(D->JzI,fieldFile,"/JzI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
     restoreFieldComp(D->JrR,fieldFile,"/JrR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
@@ -499,6 +499,8 @@ void restoreDumpHDF(Domain *D,int iteration,char *partFile,char *fieldFile)
       restoreFieldComp(D->ErI,fieldFile,"/ErI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
       restoreFieldComp(D->EpR,fieldFile,"/EpR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
       restoreFieldComp(D->EpI,fieldFile,"/EpI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
+      restoreFieldComp(D->BzR,fieldFile,"/BzR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
+      restoreFieldComp(D->BzI,fieldFile,"/BzI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
       restoreFieldComp(D->BrR,fieldFile,"/BrR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
       restoreFieldComp(D->BrI,fieldFile,"/BrI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
       restoreFieldComp(D->BpR,fieldFile,"/BpR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
@@ -514,8 +516,6 @@ void restoreDumpHDF(Domain *D,int iteration,char *partFile,char *fieldFile)
       restoreFieldComp(D->SlI,fieldFile,"/SlI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
       restoreFieldComp(D->EzCR,fieldFile,"/EzCR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
       restoreFieldComp(D->EzCI,fieldFile,"/EzCI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
-      restoreFieldComp(D->BzCR,fieldFile,"/BzCR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
-      restoreFieldComp(D->BzCI,fieldFile,"/BzCI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
       restoreFieldComp(D->PrCR,fieldFile,"/PrCR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
       restoreFieldComp(D->PrCI,fieldFile,"/PrCI",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);
       restoreFieldComp(D->PlCR,fieldFile,"/PlCR",nx,ny,nxSub,nySub,istart,iend,jstart,jend,numMode,offset);

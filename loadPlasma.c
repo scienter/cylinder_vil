@@ -134,13 +134,13 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
              dPhi=2.0*pi/((double)numPhi);
  
              for(n=0; n<numberRZ; n++) {
-//               random2D_sobol(&positionZ,&positionR,q);
+               random2D_sobol(&positionZ,&positionR,q);
                cnt=0;
                phi=randomValue(1.0)*2.0*pi;             
 //               phi=0.5*dPhi;
                while(cnt<numPhi)  {      
-                 positionZ=randomValue(1.0);
-                 positionR=randomValue(1.0);
+//                 positionZ=randomValue(1.0);
+//                 positionR=randomValue(1.0);
 
                  New = (ptclList *)malloc(sizeof(ptclList)); 
                  New->next = particle[i][j].head[s]->pt;
@@ -157,7 +157,7 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
                    New->y=r*sinPhi;
                    New->oldX=New->x;
                    New->oldY=New->y;
-                   New->weight=weight*2.0*r;
+                   New->weight=weight*(j-jstart+0.5);
                  New->charge=charge;
 
                  New->Ez=New->Ex=New->Ey=0.0;
@@ -218,13 +218,13 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
              dPhi=2.0*pi/((double)numPhi);
  
              for(n=0; n<numberRZ; n++) {
-//               random2D_sobol(&positionZ,&positionR,q);
+               random2D_sobol(&positionZ,&positionR,q);
                cnt=0;
                phi=randomValue(1.0)*2.0*pi;             
 //               phi=0.5*dPhi;
                while(cnt<numPhi)  {      
-                 positionZ=randomValue(1.0);
-                 positionR=randomValue(1.0);
+//                 positionZ=randomValue(1.0);
+//                 positionR=randomValue(1.0);
 
                  New = (ptclList *)malloc(sizeof(ptclList)); 
                  New->next = particle[i][j].head[s]->pt;
@@ -240,8 +240,9 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
                    New->y=r*sinPhi;
                    New->oldX=New->x;
                    New->oldY=New->y;
-                 if(r>=0.5) New->weight=weight*2.0*r;
-                 else       New->weight=weight*(r*r+r+0.25);
+//                 if(r>=0.5) New->weight=weight*r;
+//                 else       New->weight=weight*(r*r+r+0.25);
+                   New->weight=weight*(j-jstart+0.5);
                  New->charge=charge;
 
                  New->Ez=New->Ex=New->Ey=0.0;

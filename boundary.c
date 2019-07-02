@@ -116,6 +116,8 @@ void boundary(Domain *D,External *Ext)
      D->RhoPairI=memoryAsign(D->numMode,nxSub1D,nySub2D);
      D->FR=memoryAsign(D->numMode,nxSub1D,nySub2D);
      D->FI=memoryAsign(D->numMode,nxSub1D,nySub2D);
+     D->CnR=memoryAsign(D->numMode,nxSub1D,nySub2D);
+     D->CnI=memoryAsign(D->numMode,nxSub1D,nySub2D);
 
      switch(D->fieldType)  {
      case Yee :
@@ -339,6 +341,8 @@ void reBoundary(Domain *D,External *Ext)
      D->RhoPairI=memoryAsign(D->numMode,nxSub1D,nySub2D);
      D->FR=memoryAsign(D->numMode,nxSub1D,nySub2D);
      D->FI=memoryAsign(D->numMode,nxSub1D,nySub2D);
+     D->CnR=memoryAsign(D->numMode,nxSub1D,nySub2D);
+     D->CnI=memoryAsign(D->numMode,nxSub1D,nySub2D);
 
      switch(D->fieldType)  {
      case Yee :

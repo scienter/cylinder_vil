@@ -150,9 +150,9 @@ flag=0;
                   New->next = particle[i][j].head[s-1]->pt;
                   particle[i][j].head[s-1]->pt = New;
 //                  z=randomValue(1.0); r=randomValue(1.0);
-                  New->z = p->z; New->oldZ= p->oldZ;
-                  New->x = p->x; New->oldX= p->oldX;
-                  New->y = p->y; New->oldZ= p->oldZ;
+                  New->z = p->z; New->oldZ= p->z;
+                  New->x = p->x; New->oldX= p->x;
+                  New->y = p->y; New->oldZ= p->y;
                   New->weight=p->weight;
 
                   New->pz=p->pz; New->px=p->px; New->py=p->py;
