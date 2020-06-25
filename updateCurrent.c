@@ -35,8 +35,12 @@ void updateCurrent(Domain D,int iteration)
   void MPI_TransferJ_Yplus();
   void MPI_TransferJ_Yminus();
 
+  double ***val;
+  int nxSub,nySub,i,j,n,iter=1;
   int nSpecies;
 
+  nxSub=D.nxSub+5;
+  nySub=D.nySub+5;
   nSpecies=D.nSpecies;
   if(D.boostOn==ON && D.boostIon==OFF)
     nSpecies=1;    
@@ -58,9 +62,226 @@ void updateCurrent(Domain D,int iteration)
 //      MPI_TransferJ_Yplus(&D,D.Jx,D.Jy,D.Jz,D.nxSub+5,1,3);
 //      MPI_TransferJ_Yminus(&D,D.Jx,D.Jy,D.Jz,D.nxSub+5,1,3);
     }  else	;
+
+    val=(double ***)malloc(1*sizeof(double ** ));
+    for(n=0; n<1; n++) {
+      val[n]=(double **)malloc(nxSub*sizeof(double * ));
+      for(i=0; i<nxSub; i++) 
+        val[n][i]=(double *)malloc(nySub*sizeof(double  ));
+    }
+    for(i=0; i<nxSub; i++)
+      for(j=0; j<nySub; j++)
+		  val[0][i][j]=0.0;
+    
+    filter_current(&D,val,D.JzR,iter);
+    filter_current(&D,val,D.JrR,iter);
+    filter_current(&D,val,D.JpR,iter);
+    filter_current(&D,val,D.JzI,iter);
+    filter_current(&D,val,D.JrI,iter);
+    filter_current(&D,val,D.JpI,iter);
+
+    for(i=0; i<nxSub; i++) free(val[0][i]);
+	 free(val[0]); free(val);
     break;
   }
 }
+
+
+void filter_current(Domain *D,double ***val,double ***J,int iter)
+{
+  int istart,iend,jstart,jend,nxSub,nySub,numMode;
+  int n,i,j,ii,jj,m;
+  double sum;
+  double wz[3],wr[3];
+
+  istart=D->istart;    iend=D->iend;
+  jstart=D->jstart;    jend=D->jend;
+  numMode=D->numMode;
+  nxSub=D->nxSub+5;
+  nySub=D->nySub+5;
+
+  wz[0]=0.25; wz[1]=0.5; wz[2]=0.25;
+
+  for(m=0; m<numMode; m++) {
+    n=0;
+    while(n<iter)  {
+      //first
+      j=jstart;
+      wr[0]=0.5; wr[1]=0.5;
+      for(i=istart; i<iend; i++) {
+        sum=0.0;
+        for(ii=0; ii<3; ii++)
+          for(jj=0; jj<2; jj++)
+            sum+=wz[ii]*wr[jj]*J[m][i-1+ii][j+jj];
+        val[0][i][j]=sum;
+      }
+
+      wr[0]=0.25; wr[1]=0.5; wr[2]=0.25;
+      for(i=istart; i<iend; i++)
+        for(j=jstart+1; j<jend; j++) {
+          sum=0.0;
+          for(ii=0; ii<3; ii++)
+            for(jj=0; jj<3; jj++)
+              sum+=wz[ii]*wr[jj]*J[m][i-1+ii][j-1+jj];
+          val[0][i][j]=sum;
+        }
+
+      if(D->L>1)  {
+        MPI_filter_Xplus(D,val,D->nySub+5,3,0);
+        MPI_filter_Xminus(D,val,D->nySub+5,3,0);
+      } else ;
+
+      //second
+      j=jstart;
+      wr[0]=0.5; wr[1]=0.5;
+      for(i=istart; i<iend; i++) {
+        sum=0.0;
+        for(ii=0; ii<3; ii++)
+          for(jj=0; jj<2; jj++)
+            sum+=wz[ii]*wr[jj]*val[0][i-1+ii][j+jj];
+        J[m][i][j]=sum;
+      }
+
+      wr[0]=0.25; wr[1]=0.5; wr[2]=0.25;
+      for(i=istart; i<iend; i++)
+        for(j=jstart+1; j<jend; j++) {
+          sum=0.0;
+          for(ii=0; ii<3; ii++)
+            for(jj=0; jj<3; jj++)
+              sum+=wz[ii]*wr[jj]*val[0][i-1+ii][j-1+jj];
+          J[m][i][j]=sum;
+        }
+
+      if(D->L>1)  {
+        MPI_filter_Xplus(D,J,D->nySub+5,3,0);
+        MPI_filter_Xminus(D,J,D->nySub+5,3,0);
+      } else ;
+      n++;
+    }
+  }
+    
+}
+
+
+void MPI_filter_Xminus(Domain *D,double ***f1,int ny,int share,int m)
+{
+    int i,j,num,start,end,numMode;
+    int istart,iend,jstart,jend;
+    int myrank, nTasks,rank;
+    double *data;
+
+    MPI_Status status;
+
+    istart=D->istart;    iend=D->iend;
+    jstart=D->jstart;    jend=D->jend;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+    rank=myrank/D->M;
+
+    num=ny*3;
+    data = (double *)malloc(num*sizeof(double ));
+
+    //Transferring even ~ odd cores 
+    start=0;
+    for(i=0; i<share; i++) {
+      for(j=0; j<ny; j++)
+	     data[start+j]=f1[m][i+istart][j];
+	   start+=ny;
+	 }
+
+    if(rank%2==0 && rank!=D->L-1)
+    {
+      MPI_Recv(data,num,MPI_DOUBLE,D->nextXrank,D->nextXrank, MPI_COMM_WORLD,&status);
+      start=0;
+        for(i=0; i<share; i++) {
+          for(j=0; j<ny; j++) f1[m][iend+i][j]=data[start+j]; start+=ny;
+        }
+    }
+    else if(rank%2==1)
+       MPI_Send(data,num,MPI_DOUBLE,D->prevXrank,myrank,MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    //Transferring odd ~ even cores             
+    start=0;
+      for(i=0; i<share; i++) {
+        for(j=0; j<ny; j++) data[start+j]=f1[m][i+istart][j]; start+=ny;
+      }
+
+    if(rank%2==1 && rank!=D->L-1)
+    {
+      MPI_Recv(data,num,MPI_DOUBLE,D->nextXrank,D->nextXrank, MPI_COMM_WORLD,&status);
+      start=0;
+        for(i=0; i<share; i++) {
+          for(j=0; j<ny; j++) f1[m][iend+i][j]=data[start+j]; start+=ny;
+        }
+    }
+    else if(rank%2==0 && rank!=0)
+       MPI_Send(data,num,MPI_DOUBLE,D->prevXrank,myrank, MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
+    free(data);
+}
+
+void MPI_filter_Xplus(Domain *D,double ***f1,int ny,int share,int m)
+{
+    int i,j,num,numMode;
+    int istart,iend,jstart,jend;
+    int myrank, nTasks,rank,start;
+    double *data;
+
+    MPI_Status status;
+
+    istart=D->istart;   iend=D->iend;
+    jstart=D->jstart;   jend=D->jend;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+    rank=myrank/D->M;
+
+    num=ny*2;
+    data = (double *)malloc(num*sizeof(double ));
+
+    //Transferring even ~ odd cores 
+    start=0;
+      for(i=1; i<share; i++)  {
+        for(j=0; j<ny; j++) data[start+j]=f1[m][iend-i][j]; start+=ny;
+      }
+
+    if(rank%2==1)
+    {
+       MPI_Recv(data,num,MPI_DOUBLE,D->prevXrank,D->prevXrank, MPI_COMM_WORLD,&status);
+      start=0;
+        for(i=1; i<share; i++) {
+          for(j=0; j<ny; j++) f1[m][istart-i][j]=data[start+j]; start+=ny;
+        }
+    }
+    else if(rank%2==0 && rank!=D->L-1)
+       MPI_Send(data,num,MPI_DOUBLE,D->nextXrank,myrank, MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    //Transferring odd ~ even cores             
+    start=0;
+      for(i=1; i<share; i++)  {
+        for(j=0; j<ny; j++) data[start+j]=f1[m][iend-i][j]; start+=ny;
+      }
+
+    if(rank%2==0 && rank!=0)
+    {
+      MPI_Recv(data,num,MPI_DOUBLE,D->prevXrank,D->prevXrank,MPI_COMM_WORLD,&status);
+      start=0;
+        for(i=1; i<share; i++) {
+          for(j=0; j<ny; j++) f1[m][istart-i][j]=data[start+j]; start+=ny;
+        }
+    }
+    else if(rank%2==1 && rank!=D->L-1)
+      MPI_Send(data,num,MPI_DOUBLE,D->nextXrank,myrank,MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
+    free(data);
+}
+
+
 
 void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
 {

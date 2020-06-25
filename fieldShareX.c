@@ -3,6 +3,133 @@
 #include "mesh.h"
 #include "mpi.h"
 
+
+void MPI_Transfer1F_Xminus(Domain *D,double ***f1,int ny,int share)
+{
+    int i,j,m,num,start,end,numMode;
+    int istart,iend,jstart,jend;
+    int myrank, nTasks,rank; 
+    double *data;
+
+    MPI_Status status;         
+
+    istart=D->istart;    iend=D->iend;
+    jstart=D->jstart;    jend=D->jend;
+    numMode=D->numMode;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);            
+
+    rank=myrank/D->M;
+
+    num=numMode*1*ny*3;
+    data = (double *)malloc(num*sizeof(double ));
+ 
+    //Transferring even ~ odd cores 
+    start=0; 
+    for(m=0; m<numMode; m++)
+      for(i=0; i<share; i++) {
+        for(j=0; j<ny; j++) data[start+j]=f1[m][i+istart][j]; start+=ny;
+      }
+
+    if(rank%2==0 && rank!=D->L-1)
+    {
+      MPI_Recv(data,num,MPI_DOUBLE,D->nextXrank,D->nextXrank, MPI_COMM_WORLD,&status);  
+      start=0; 
+      for(m=0; m<numMode; m++)
+        for(i=0; i<share; i++) {
+          for(j=0; j<ny; j++) f1[m][iend+i][j]=data[start+j]; start+=ny;
+        }  
+    }
+    else if(rank%2==1)
+       MPI_Send(data,num,MPI_DOUBLE,D->prevXrank,myrank,MPI_COMM_WORLD);             
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    //Transferring odd ~ even cores             
+    start=0; 
+    for(m=0; m<numMode; m++)
+      for(i=0; i<share; i++) {
+        for(j=0; j<ny; j++) data[start+j]=f1[m][i+istart][j]; start+=ny;
+      }
+        
+    if(rank%2==1 && rank!=D->L-1)
+    {
+      MPI_Recv(data,num,MPI_DOUBLE,D->nextXrank,D->nextXrank, MPI_COMM_WORLD,&status);  
+      start=0; 
+      for(m=0; m<numMode; m++)
+        for(i=0; i<share; i++) {
+          for(j=0; j<ny; j++) f1[m][iend+i][j]=data[start+j]; start+=ny;
+        }  
+    }
+    else if(rank%2==0 && rank!=0)
+       MPI_Send(data,num,MPI_DOUBLE,D->prevXrank,myrank, MPI_COMM_WORLD);             
+    MPI_Barrier(MPI_COMM_WORLD);
+    free(data);
+}
+
+void MPI_Transfer1F_Xplus(Domain *D,double ***f1,int ny,int share)
+{
+    int i,j,m,num,numMode;
+    int istart,iend,jstart,jend;
+    int myrank, nTasks,rank,start; 
+    double *data;
+
+    MPI_Status status;         
+   
+    istart=D->istart;   iend=D->iend;
+    jstart=D->jstart;   jend=D->jend;
+    numMode=D->numMode;
+  
+    MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);            
+
+    rank=myrank/D->M;
+
+    num=numMode*1*ny*2;
+    data = (double *)malloc(num*sizeof(double ));
+
+    //Transferring even ~ odd cores 
+    start=0; 
+    for(m=0; m<numMode; m++)
+      for(i=1; i<share; i++)  {
+        for(j=0; j<ny; j++) data[start+j]=f1[m][iend-i][j]; start+=ny;
+      }
+      
+    if(rank%2==1)
+    {
+       MPI_Recv(data,num,MPI_DOUBLE,D->prevXrank,D->prevXrank, MPI_COMM_WORLD,&status);  
+      start=0;
+      for(m=0; m<numMode; m++)
+        for(i=1; i<share; i++) {
+          for(j=0; j<ny; j++) f1[m][istart-i][j]=data[start+j]; start+=ny;
+        }
+    }
+    else if(rank%2==0 && rank!=D->L-1)
+       MPI_Send(data,num,MPI_DOUBLE,D->nextXrank,myrank, MPI_COMM_WORLD);             
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    //Transferring odd ~ even cores             
+    start=0; 
+    for(m=0; m<numMode; m++)
+      for(i=1; i<share; i++)  {
+        for(j=0; j<ny; j++) data[start+j]=f1[m][iend-i][j]; start+=ny;
+      }
+        
+    if(rank%2==0 && rank!=0)
+    {
+      MPI_Recv(data,num,MPI_DOUBLE,D->prevXrank,D->prevXrank,MPI_COMM_WORLD,&status);  
+      start=0;
+      for(m=0; m<numMode; m++)
+        for(i=1; i<share; i++) {
+          for(j=0; j<ny; j++) f1[m][istart-i][j]=data[start+j]; start+=ny;
+        }
+    }
+    else if(rank%2==1 && rank!=D->L-1)
+      MPI_Send(data,num,MPI_DOUBLE,D->nextXrank,myrank,MPI_COMM_WORLD);             
+    MPI_Barrier(MPI_COMM_WORLD);
+    free(data);
+}
+
 void MPI_Transfer2F_Xminus(Domain *D,double ***f1,double ***f2,int ny,int share)
 {
     int i,j,m,num,start,end,numMode;

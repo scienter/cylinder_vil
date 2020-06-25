@@ -298,4 +298,8 @@ void MPI_Transfer12F_Xplus(Domain *D,double ***f1,double ***f2,double ***f3,doub
 void MPI_TransferDen_Xplus(Domain *D,double ***f1,double ***f2,int ny,int share);
 void MPI_TransferDen_Xminus(Domain *D,double ***f1,double ***f2,int ny,int share);
 void calConservation(Domain D,int iteration);
+void filter_current(Domain *D,double ***val,double ***J,int iter);
+void MPI_filter_Xminus(Domain *D,double ***f1,int ny,int share,int m);
+void MPI_filter_Xplus(Domain *D,double ***f1,int ny,int share,int m);
+
 

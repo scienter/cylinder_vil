@@ -25,8 +25,8 @@ void solveF(Domain D)
 
 void solveF_NDFX(Domain *D)
 {
-  int i,j,m,s,numMode,istart,iend,jstart,jend,minRSub;
-  double invDr,invDz,r;
+  int i,j,m,s,numMode,istart,iend,jstart,jend,minRSub,n,iter=1;
+  double invDr,invDz,r,***val;
   double upPrR,upPrI,upPlR,upPlI,upSrR,upSrI,upSlR,upSlI;
   double dnPrR,dnPrI,dnPlR,dnPlI,dnSrR,dnSrI,dnSlR,dnSlI;
   char name[100];
@@ -61,6 +61,23 @@ void solveF_NDFX(Domain *D)
     MPI_TransferDen_Xplus(D,D->RhoNoPairR,D->RhoNoPairI,D->nySub+5,3);
     MPI_TransferDen_Xminus(D,D->RhoNoPairR,D->RhoNoPairI,D->nySub+5,3);
   }  else ;
+
+  val=(double ***)malloc(1*sizeof(double ** ));
+  for(n=0; n<1; n++) {
+    val[n]=(double **)malloc((D->nxSub+5)*sizeof(double * ));
+    for(i=0; i<D->nxSub+5; i++)
+      val[n][i]=(double *)malloc((D->nySub+5)*sizeof(double  ));
+  }
+  for(i=0; i<D->nxSub+5; i++)
+    for(j=0; j<D->nySub+5; j++)
+      val[0][i][j]=0.0;
+
+  filter_current(D,val,D->RhoNoPairR,iter);
+  filter_current(D,val,D->RhoNoPairI,iter);
+
+  for(i=0; i<D->nxSub; i++) free(val[0][i]);
+  free(val[0]); free(val);
+
 
   m=0;
   for(i=istart; i<iend; i++)
@@ -134,8 +151,8 @@ void solveF_NDFX(Domain *D)
 
 void solveF_Yee(Domain *D)
 {
-  int i,j,m,s,numMode,istart,iend,jstart,jend,minRSub;
-  double invDr,invDz,r;
+  int i,j,m,s,numMode,istart,iend,jstart,jend,minRSub,n,iter=1;
+  double invDr,invDz,r,***val;
   char name[100];
   FILE *out;
   LoadList *LL;
@@ -168,6 +185,22 @@ void solveF_Yee(Domain *D)
     MPI_TransferDen_Xplus(D,D->RhoNoPairR,D->RhoNoPairI,D->nySub+5,3);
     MPI_TransferDen_Xminus(D,D->RhoNoPairR,D->RhoNoPairI,D->nySub+5,3);
   }  else ;
+
+  val=(double ***)malloc(1*sizeof(double ** ));
+  for(n=0; n<1; n++) {
+    val[n]=(double **)malloc((D->nxSub+5)*sizeof(double * ));
+    for(i=0; i<D->nxSub+5; i++)
+      val[n][i]=(double *)malloc((D->nySub+5)*sizeof(double  ));
+  }
+  for(i=0; i<D->nxSub+5; i++)
+    for(j=0; j<D->nySub+5; j++)
+      val[0][i][j]=0.0;
+
+  filter_current(D,val,D->RhoNoPairR,iter);
+  filter_current(D,val,D->RhoNoPairI,iter);
+
+  for(i=0; i<D->nxSub; i++) free(val[0][i]);
+  free(val[0]); free(val);
 
 //  if(myrank==0) istart=D->istart+1; else ;
 

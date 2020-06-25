@@ -8,8 +8,8 @@
 int main(int argc, char *argv[])
 {
     int i,j,k,n,s,iteration=0,boost,filterStep,labSaveStep;
-    int rnk,suddenDump=OFF,shiftIteration;
-    double factor,time_spent,t,dF=0.0,x;
+    int rnk,suddenDump=OFF,shiftIteration,iter=1;
+    double factor,time_spent,t,dF=0.0,x,***val;
     clock_t begin,end;
     struct tm *t_now;
     time_t timer; 	//measure time
@@ -93,6 +93,23 @@ int main(int argc, char *argv[])
         MPI_TransferDen_Xplus(&D,D.RhoPairR,D.RhoPairI,D.nySub+5,3);
         MPI_TransferDen_Xminus(&D,D.RhoPairR,D.RhoPairI,D.nySub+5,3);
       }  else ;
+
+      val=(double ***)malloc(1*sizeof(double ** ));
+      for(n=0; n<1; n++) {
+        val[n]=(double **)malloc((D.nxSub+5)*sizeof(double * ));
+        for(i=0; i<D.nxSub+5; i++)
+          val[n][i]=(double *)malloc((D.nySub+5)*sizeof(double  ));
+      }
+      for(i=0; i<D.nxSub+5; i++)
+        for(j=0; j<D.nySub+5; j++)
+          val[0][i][j]=0.0;
+
+      filter_current(&D,val,D.RhoPairR,iter);
+      filter_current(&D,val,D.RhoPairI,iter);
+
+      for(i=0; i<D.nxSub+5; i++) free(val[0][i]);
+      free(val[0]); free(val);
+
     } else ;
 
 
