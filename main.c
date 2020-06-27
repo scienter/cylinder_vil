@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {
     int i,j,k,n,s,iteration=0,boost,filterStep,labSaveStep;
-    int rnk,suddenDump=OFF,shiftIteration,iter=1;
+    int rnk,suddenDump=OFF,shiftIteration,iter;
     double factor,time_spent,t,dF=0.0,x,***val;
     clock_t begin,end;
     struct tm *t_now;
@@ -103,15 +103,14 @@ int main(int argc, char *argv[])
       for(i=0; i<D.nxSub+5; i++)
         for(j=0; j<D.nySub+5; j++)
           val[0][i][j]=0.0;
-
-      filter_current(&D,val,D.RhoPairR,iter);
-      filter_current(&D,val,D.RhoPairI,iter);
+    
+      filter_current(&D,val,D.RhoPairR,D.filterIter);
+      filter_current(&D,val,D.RhoPairI,D.filterIter);
 
       for(i=0; i<D.nxSub+5; i++) free(val[0][i]);
       free(val[0]); free(val);
 
     } else ;
-
 
     //rooping time 
     while(iteration<=D.maxStep)

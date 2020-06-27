@@ -25,7 +25,7 @@ void solveF(Domain D)
 
 void solveF_NDFX(Domain *D)
 {
-  int i,j,m,s,numMode,istart,iend,jstart,jend,minRSub,n,iter=1;
+  int i,j,m,s,numMode,istart,iend,jstart,jend,minRSub,n,iter;
   double invDr,invDz,r,***val;
   double upPrR,upPrI,upPlR,upPlI,upSrR,upSrI,upSlR,upSlI;
   double dnPrR,dnPrI,dnPlR,dnPlI,dnSrR,dnSrI,dnSlR,dnSlI;
@@ -39,6 +39,7 @@ void solveF_NDFX(Domain *D)
   istart=D->istart; iend=D->iend;
   jstart=D->jstart; jend=D->jend;
   numMode=D->numMode; minRSub=D->minYSub;
+  iter=D->filterIter;
   invDr=1.0/D->dr; invDz=1.0/D->dz;
 
   //initializing density
@@ -75,7 +76,7 @@ void solveF_NDFX(Domain *D)
   filter_current(D,val,D->RhoNoPairR,iter);
   filter_current(D,val,D->RhoNoPairI,iter);
 
-  for(i=0; i<D->nxSub; i++) free(val[0][i]);
+  for(i=0; i<D->nxSub+5; i++) free(val[0][i]);
   free(val[0]); free(val);
 
 
@@ -151,7 +152,7 @@ void solveF_NDFX(Domain *D)
 
 void solveF_Yee(Domain *D)
 {
-  int i,j,m,s,numMode,istart,iend,jstart,jend,minRSub,n,iter=1;
+  int i,j,m,s,numMode,istart,iend,jstart,jend,minRSub,n,iter;
   double invDr,invDz,r,***val;
   char name[100];
   FILE *out;
@@ -163,6 +164,7 @@ void solveF_Yee(Domain *D)
   istart=D->istart; iend=D->iend;
   jstart=D->jstart; jend=D->jend;
   numMode=D->numMode; minRSub=D->minYSub;
+  iter=D->filterIter;
   invDr=1.0/D->dr; invDz=1.0/D->dz;
 
   //initializing density
@@ -199,7 +201,7 @@ void solveF_Yee(Domain *D)
   filter_current(D,val,D->RhoNoPairR,iter);
   filter_current(D,val,D->RhoNoPairI,iter);
 
-  for(i=0; i<D->nxSub; i++) free(val[0][i]);
+  for(i=0; i<D->nxSub+5; i++) free(val[0][i]);
   free(val[0]); free(val);
 
 //  if(myrank==0) istart=D->istart+1; else ;

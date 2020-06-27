@@ -30,7 +30,7 @@
 typedef struct _Domain 
 {
    int dimension;
-   int filter;
+   int filter,filterIter;
 
    int fieldType;
    int currentType;

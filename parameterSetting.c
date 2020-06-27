@@ -62,6 +62,9 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    if(FindParameters("Domain",1,"filter",input,str))
      D->filter=whatONOFF(str);
    else D->filter=OFF;
+   if(FindParameters("Domain",1,"filter_iteration",input,str))
+     D->filterIter=atoi(str);
+   else D->filterIter=1;
 
    //Field Type
    if(FindParameters("Domain",1,"field_type",input,str)) 
@@ -251,6 +254,7 @@ void parameterSetting(Domain *D,External *Ext, char *input)
       printf("In [Domain], divisionLambda=? [1/number of devided wavelength]\n");
       fail=1;
    }
+	D->divisionLambda=1.0/D->divisionLambda;
    if(FindParameters("Domain",1,"dt_ratio",input,str)) 
       D->dtRatio=atof(str);
    else  {

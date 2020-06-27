@@ -1,8 +1,8 @@
 [Save]
  field_save=ON		//ON, OFF
- particle_save=ON
+ particle_save=OFF
  density_save=ON
- dump_save=ON
+ dump_save=OFF
 
  field_format=HDF		//present, only HDF
  particle_format=HDF		//present, only HDF
@@ -47,9 +47,9 @@
  max_step=10000
  save_step=1000
  save_start=1000
- center_save_step=5000		//it will save center field file.
+ center_save_step=1000		//it will save center field file.
 
- L=4				//how many cores?
+ L=2				//how many cores?
  M=1				//not work
  N=1				//not work
 
@@ -57,9 +57,9 @@
  moving_velocity=0.94		//moving domain velocity. 1 is C.
 
  minX=0
- maxX=50e-6
+ maxX=30e-6
  minY=0e-6			//must be 0
- maxY=50e-6
+ maxY=30e-6
  minZ=-30e-6			//not work
  maxZ=30e-6			//not work
  lambda=0.8e-6
@@ -76,16 +76,16 @@
 
 [Laser]
  wavelength=0.8e-6
- a0=4.5
- rU=9.5			 	//number of wave length
- rD=9.5
+ a0=2
+ rU=4			 	//number of wave length
+ rD=4
  flat=0
  retard=0
  polarity=2
  loadPositionX=0e-5		//laser start position [m]
  loadPositionY=0.0e-5		//laser start position [m]
- beamWaist=40e-6
- focus=200e-6
+ beamWaist=10e-6
+ focus=60e-6
 
 
 [External]
@@ -99,9 +99,9 @@
 [Plasma]
  species=Electron
  type=Polygon
- density=1.5e24
+ density=1.0e25
  numberRZ=2		// number in cell=numberRZ*numberPhi
- numberPhi=6
+ numberPhi=4
  startIndex=0		//not work
  temperature=0
 
@@ -111,7 +111,7 @@
 
  Xnodes=4
  X0=10e-6
- X1=200e-6
+ X1=50e-6
  X2=50000e-6
  X3=4000000e-6
  Xn0=0
@@ -121,8 +121,8 @@
 
  Ynodes=3
  Y0=0e-6
- Y1=78e-6
- Y2=80e-6
+ Y1=38e-6
+ Y2=40e-6
  Yn0=1
  Yn1=1
  Yn2=0
