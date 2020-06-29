@@ -277,7 +277,7 @@ void restoreIntMeta(char *fileName,char *dataName,int *data,int dataCnt);
 void solveF(Domain D);
 void solveCharge(Domain *D,LoadList *LL,double ***rhoR,double ***rhoI,int istart,int iend,int jstart,int jend,int s,double coef);
 void movingPairCharge(Domain *D);
-void filter(Domain *D);
+void filter(Domain *D,double ***dataR,double ***dataI);
 void filterFieldC(Domain *D);
 void ionizationSetup(LoadList *LL,int species);
 void fieldIonization(Domain *D);

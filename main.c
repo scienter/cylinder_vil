@@ -93,7 +93,9 @@ int main(int argc, char *argv[])
         MPI_TransferDen_Xplus(&D,D.RhoPairR,D.RhoPairI,D.nySub+5,3);
         MPI_TransferDen_Xminus(&D,D.RhoPairR,D.RhoPairI,D.nySub+5,3);
       }  else ;
-
+      filter(&D,D.RhoPairR,D.RhoPairI);
+	
+/*
       val=(double ***)malloc(1*sizeof(double ** ));
       for(n=0; n<1; n++) {
         val[n]=(double **)malloc((D.nxSub+5)*sizeof(double * ));
@@ -109,6 +111,7 @@ int main(int argc, char *argv[])
 
       for(i=0; i<D.nxSub+5; i++) free(val[0][i]);
       free(val[0]); free(val);
+*/		
 
     } else ;
 

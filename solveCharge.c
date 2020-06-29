@@ -302,7 +302,7 @@ void solveCharge(Domain *D,LoadList *LL,double ***rhoR,double ***rhoI,int istart
 
   alpha=2.0;
   for(i=istart; i<iend; i++)
-    for(j=jstart+1; j<jend; j++)
+    for(j=jstart; j<jend; j++)
       {
         p=particle[i][j].head[s]->pt;
         while(p) {
@@ -321,7 +321,7 @@ void solveCharge(Domain *D,LoadList *LL,double ***rhoR,double ***rhoI,int istart
             sins[m]=sins[m-1]*coss[1]+coss[m-1]*sins[1];
           }
 
-          factor=weight/(index+0.5);
+          factor=weight/(2.0*index+1.0);
           for(ii=0; ii<2; ii++)
             for(jj=0; jj<2; jj++) {
 //              factor=weight/(2.0*(j+jj-jstart));
@@ -336,47 +336,6 @@ void solveCharge(Domain *D,LoadList *LL,double ***rhoR,double ***rhoI,int istart
           p=p->next;
         }
       }		//End of for(i,j)
-
-    j=jstart;
-    for(i=istart; i<iend; i++) {
-        p=particle[i][j].head[s]->pt;
-        while(p) {
-          weight=coef*p->weight*rho0*p->charge;
-          z=p->z; x=p->x; y=p->y;
-          r=sqrt(x*x+y*y);   invR=1.0/r;
-          index=j-jstart;
-
-          coss[1]=x*invR; sins[1]=y*invR;
-          for(m=2; m<numMode; m++) {
-            coss[m]=coss[m-1]*coss[1]-sins[m-1]*sins[1];
-            sins[m]=sins[m-1]*coss[1]+coss[m-1]*sins[1];
-          }
-
-          Wr[0]=((index+1)*(index+1)-r*r)/(2.0*index+1.0);
-          Wr[1]=1.0-Wr[0];
-          Wz[1]=z-(int)(z);              Wz[0]=1.0-Wz[1];
-
-          factor=weight/(index+0.5);
-          jj=0;
-//          factor=weight*4.0;
-          for(ii=0; ii<2; ii++) {
-            tmp=Wr[jj]*Wz[ii]*factor;
-            rhoR[0][i+ii][j+jj]+=tmp;
-          }
-
-          jj=1;
-//          factor=weight/(2.0*(j+jj-jstart));
-          for(ii=0; ii<2; ii++) {
-              tmp=Wr[jj]*Wz[ii]*factor;
-              rhoR[0][i+ii][j+jj]+=tmp;
-              for(m=1; m<numMode; m++) {
-                rhoR[m][i+ii][j+jj]+=tmp*coss[m]*alpha;
-                rhoI[m][i+ii][j+jj]-=tmp*sins[m]*alpha;
-              }
-          }
-          p=p->next;
-        }
-    }		//End of for(i)
 
 }
 

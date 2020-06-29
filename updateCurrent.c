@@ -60,31 +60,10 @@ void updateCurrent(Domain D,int iteration)
         MPI_Transfer12F_Xminus(&D,D.JrCR,D.JrCI,D.JrR,D.JrI,D.JpCR,D.JpCI,D.JpR,D.JpI,D.JzCR,D.JzCI,D.JzR,D.JzI,D.nySub+5,3);
       } else;
     }  else	;
-    if(D.M>1)  {
-//      MPI_TransferJ_Yplus(&D,D.Jx,D.Jy,D.Jz,D.nxSub+5,1,3);
-//      MPI_TransferJ_Yminus(&D,D.Jx,D.Jy,D.Jz,D.nxSub+5,1,3);
-    }  else	;
 
-    val=(double ***)malloc(1*sizeof(double ** ));
-    for(n=0; n<1; n++) {
-      val[n]=(double **)malloc(nxSub*sizeof(double * ));
-      for(i=0; i<nxSub; i++) 
-        val[n][i]=(double *)malloc(nySub*sizeof(double  ));
-    }
-    for(i=0; i<nxSub; i++)
-      for(j=0; j<nySub; j++)
-		  val[0][i][j]=0.0;
-    
-    filter_current(&D,val,D.JzR,iter);
-    filter_current(&D,val,D.JrR,iter);
-    filter_current(&D,val,D.JpR,iter);
-    filter_current(&D,val,D.JzI,iter);
-    filter_current(&D,val,D.JrI,iter);
-    filter_current(&D,val,D.JpI,iter);
-
-    for(i=0; i<nxSub; i++) free(val[0][i]);
-	 free(val[0]); free(val);
-
+    filter(&D,D.JzR,D.JzI);
+    filter(&D,D.JrR,D.JrI);
+    filter(&D,D.JpR,D.JpI);
     break;
   }
 }
@@ -360,9 +339,9 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
          }
     }
     alpha=2.0;
-
+/*
     for(i=istart; i<iend; i++)
-      for(j=jstart+2; j<jend; j++)
+      for(j=jstart+1; j<jend; j++)
       {
         for(s=0; s<nSpecies; s++)
         {
@@ -401,7 +380,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
             Fz=(zr-z1)*dzBydt; Fr=(rr-r1)*drBydt;
             ii=i1; jj=j1+jstart;
 
-            factor=weight*coeff[s]/(j1+0.5);
+            factor=weight*coeff[s]/(2.0*j1+1.0);
             tmpZ[0]=Fz*Wr[0]*factor;
             tmpZ[1]=Fz*Wr[1]*factor;
             tmpR[0]=Fr*Wz[0]*factor;
@@ -437,7 +416,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
 
               //Jp
             vp=coss[1]*(yr-y1)*drBydt-sins[1]*(xr-x1)*drBydt;
-            factor=vp*weight*coeff[s]/(j1+0.5);
+            factor=vp*weight*coeff[s]/(2.0*j1+1.0);
             tmpP[0][0]=Wz[0]*Wr[0]*factor;
             tmpP[1][0]=Wz[1]*Wr[0]*factor;
             tmpP[0][1]=Wz[0]*Wr[1]*factor;
@@ -446,7 +425,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
               for(jj=0; jj<2; jj++)
                 D->JpR[0][ii+i1][jj+j1+jstart]+=tmpP[ii][jj];
             //Jp Davidson method          
-            factor=weight*coeff[s]/(j1+0.5); 
+            factor=weight*coeff[s]/(2.0*j1+1.0); 
             for(m=1; m<numMode; m++)  {
               for(ii=0; ii<2; ii++) 
                 for(jj=0; jj<2; jj++)  {
@@ -470,7 +449,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
             }
 
             Fz=(z2-zr)*dzBydt; Fr=(r2-rr)*drBydt;
-            factor=weight*coeff[s]/(j2+0.5);
+            factor=weight*coeff[s]/(2.0*j2+1.0);
             tmpZ[0]=Fz*Wr[0]*factor;
             tmpZ[1]=Fz*Wr[1]*factor;
             tmpR[0]=Fr*Wz[0]*factor;
@@ -506,7 +485,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
 
               //Jp
             vp=coss[1]*(y2-yr)*drBydt-sins[1]*(x2-xr)*drBydt;
-            factor=vp*weight*coeff[s]/(j2+0.5);
+            factor=vp*weight*coeff[s]/(2.0*j2+1.0);
             tmpP[0][0]=Wz[0]*Wr[0]*factor;
             tmpP[1][0]=Wz[1]*Wr[0]*factor;
             tmpP[0][1]=Wz[0]*Wr[1]*factor;
@@ -515,7 +494,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
               for(jj=0; jj<2; jj++)
                 D->JpR[0][ii+i2][jj+j2+jstart]+=tmpP[ii][jj];
             //Jp Davidson method          
-            factor=weight*coeff[s]/(j2+0.5); 
+            factor=weight*coeff[s]/(2.0*j2+1.0); 
             for(m=1; m<numMode; m++)  {
               for(ii=0; ii<2; ii++) 
                 for(jj=0; jj<2; jj++)  {
@@ -530,11 +509,11 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
 
         }    //End of for(s)     
       }      //End of for(i,j)
-
+*/
 
     // for Axis
     for(i=istart; i<iend; i++)
-      for(j=jstart; j<jstart+2; j++)
+      for(j=jstart; j<jend; j++)
       {
         for(s=0; s<nSpecies; s++)
         {
@@ -572,7 +551,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
             }
 
             Fz=(zr-z1)*dzBydt; Fr=(rr-r1)*drBydt;
-            factor=weight*coeff[s]/(j1+0.5);
+            factor=weight*coeff[s]/(2.0*j1+1.0);
 
             tmpZ[0]=Fz*Wr[0]*factor;
             tmpZ[1]=Fz*Wr[1]*factor;
@@ -627,7 +606,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
 
               //Jp
             vp=coss[1]*(yr-y1)*drBydt-sins[1]*(xr-x1)*drBydt;
-            factor=vp*weight*coeff[s]/(j1+0.5);
+            factor=vp*weight*coeff[s]/(2.0*j1+1.0);
             tmpP[0][0]=Wz[0]*Wr[0]*factor;
             tmpP[1][0]=Wz[1]*Wr[0]*factor;
             tmpP[0][1]=Wz[0]*Wr[1]*factor;
@@ -644,7 +623,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
                   D->JpR[0][i1+ii][jj+j1+jstart]+=tmpP[ii][jj];
 //            }
             //Jp Davidson method          
-            factor=weight*coeff[s]/(j1+0.5); 
+            factor=weight*coeff[s]/(2.0*j1+1.0); 
             for(m=1; m<numMode; m++)  {
               for(ii=0; ii<2; ii++) 
                 for(jj=0; jj<2; jj++)  {
@@ -668,7 +647,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
             }
 
             Fz=(z2-zr)*dzBydt; Fr=(r2-rr)*drBydt;
-            factor=weight*coeff[s]/(j2+0.5);
+            factor=weight*coeff[s]/(2.0*j2+1.0);
 
             tmpZ[0]=Fz*Wr[0]*factor;
             tmpZ[1]=Fz*Wr[1]*factor;
@@ -723,7 +702,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
 
               //Jp
             vp=coss[1]*(y2-yr)*drBydt-sins[1]*(x2-xr)*drBydt;
-            factor=vp*weight*coeff[s]/(j2+0.5);
+            factor=vp*weight*coeff[s]/(2.0*j2+1.0);
             tmpP[0][0]=Wz[0]*Wr[0]*factor;
             tmpP[1][0]=Wz[1]*Wr[0]*factor;
             tmpP[0][1]=Wz[0]*Wr[1]*factor;
@@ -740,7 +719,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
                   D->JpR[0][i2+ii][jj+j2+jstart]+=tmpP[ii][jj];
 //            }
             //Jp Davidson method          
-            factor=weight*coeff[s]/(j2+0.5); 
+            factor=weight*coeff[s]/(2.0*j2+1.0); 
             for(m=1; m<numMode; m++)  {
               for(ii=0; ii<2; ii++) 
                 for(jj=0; jj<2; jj++)  {

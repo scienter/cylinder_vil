@@ -12,6 +12,7 @@ int randomInt(int range);
 void loadPlasma_crystal(Domain *D,LoadList *LL,int s);
 void random1D_sobol(double *x,gsl_qrng *q);
 void random2D_sobol(double *x,double *y,gsl_qrng *q);
+void random3D_sobol(double *z,double *x,double *y,gsl_qrng *q);
 double randomValue(double beta);
 void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int iend,int jstart,int jend);
 
@@ -75,7 +76,8 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
    int modeX,modeYZ,minRSub,minZSub;
    double z,r,R,posX,posY,posZ,v1,v2,v3,centerX,centerY,centerZ,tmp,weight,charge;
    double gaussCoefX,polyCoefX,gaussCoefYZ,polyCoefYZ,minZ,maxZ;
-   double ne,randTest,positionZ,positionR,dPhi,phi,z0,pz0,alpha,cosPhi,sinPhi;
+   double tz,tx,ty,positionR;
+   double ne,randTest,dPhi,phi,z0,pz0,alpha,cosPhi,sinPhi;
    int myrank;
    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
    Particle **particle;
@@ -105,12 +107,12 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
 
    srand((iteration+1)*myrank);
 
+/*
    //position define      
+   gsl_qrng *q = gsl_qrng_alloc (gsl_qrng_sobol,2);
    for(i=istart; i<iend; i++)
-     for(j=jstart+1; j<jend; j++)
+     for(j=jstart+2; j<jend; j++)
      {
-       gsl_qrng *q = gsl_qrng_alloc (gsl_qrng_sobol,2);
-
        for(l=0; l<LL->xnodes-1; l++)
          for(t=0; t<LL->ynodes-1; t++)
          {
@@ -134,7 +136,17 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
              dPhi=2.0*pi/((double)numPhi);
  
              for(n=0; n<numberRZ; n++) {
-               random2D_sobol(&positionZ,&positionR,q);
+//					r=2.0;
+//               while(r>=1.0 || r==0.0) {
+                 random2D_sobol(&tz,&positionR,q);
+//                 tz=randomValue(1.0);
+//                 tx=randomValue(1.0);
+//                 ty=randomValue(1.0);
+//                 tx=2.0*tx-1.0;
+//                 ty=2.0*ty-1.0;
+//                 r=sqrt(tx*tx+ty*ty);
+//               }
+
                cnt=0;
                phi=randomValue(1.0)*2.0*pi;             
 //               phi=0.5*dPhi;
@@ -146,24 +158,25 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
                  New->next = particle[i][j].head[s]->pt;
                  particle[i][j].head[s]->pt = New;
  
-                 New->z = positionZ;
-                 New->oldZ= i+positionZ;
+                 New->z = tz;
+                 New->oldZ= i+tz;
                  index=j-jstart+minRSub;
                  cosPhi=cos(phi);
                  sinPhi=sin(phi);
-//                   r=positionR+j-jstart-0.5;
                    r=positionR+j-jstart;
                    New->x=r*cosPhi;
                    New->y=r*sinPhi;
+//                   New->x=(index+r)*tx/r;
+//                   New->y=(index+r)*ty/r;
                    New->oldX=New->x;
                    New->oldY=New->y;
-                   New->weight=weight*(j-jstart+0.5);
+                   New->weight=weight*(2.0*index+1.0);
                  New->charge=charge;
 
                  New->Ez=New->Ex=New->Ey=0.0;
                  New->Bz=New->Bx=New->By=0.0;
                  
-                 z=i+positionZ-istart+minZSub;
+                 z=i+tz-istart+minZSub;
                  if(z>minZ && z<maxZ) {
                    v1=alpha*(z-z0)+pz0;
                    v1=maxwellianVelocity(LL->temperatureZ)/velocityC+v1;
@@ -185,16 +198,15 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
              }			//end of for(n)
            }	
          } 		//end of for(lnodes)  
-       gsl_qrng_free(q);
 
      }			//End of for(i,j)
+     gsl_qrng_free(q);
+*/
 
-   //position define      
+   gsl_qrng *q = gsl_qrng_alloc (gsl_qrng_sobol,3);
    for(i=istart; i<iend; i++)
-     for(j=jstart; j<jstart+1; j++)
+     for(j=jstart; j<jend; j++)
      {
-       gsl_qrng *q = gsl_qrng_alloc (gsl_qrng_sobol,2);
-
        for(l=0; l<LL->xnodes-1; l++)
          for(t=0; t<LL->ynodes-1; t++)
          {
@@ -215,40 +227,38 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
 //             randTest=ne-intNum;
 //             if(randTest>randomValue(1.0)) intNum=intNum+1;
              weight=ne/(double)(numPhi*numberRZ);
-             dPhi=2.0*pi/((double)numPhi);
  
              for(n=0; n<numberRZ; n++) {
-               random2D_sobol(&positionZ,&positionR,q);
-               cnt=0;
-               phi=randomValue(1.0)*2.0*pi;             
-//               phi=0.5*dPhi;
-               while(cnt<numPhi)  {      
-//                 positionZ=randomValue(1.0);
-//                 positionR=randomValue(1.0);
+					r=2.0;
+               while(r>=1.0 || r==0.0) {
+                 tz=randomValue(1.0);
+                 tx=randomValue(1.0);
+                 ty=randomValue(1.0);
+                 tx=2.0*tx-1.0;
+                 ty=2.0*ty-1.0;
+                 r=sqrt(tx*tx+ty*ty);
+               }
 
+               cnt=0;
+               while(cnt<numPhi)  {      
                  New = (ptclList *)malloc(sizeof(ptclList)); 
                  New->next = particle[i][j].head[s]->pt;
                  particle[i][j].head[s]->pt = New;
  
-                 New->z = positionZ;
-                 New->oldZ= i+positionZ;
+                 New->z = tz;
+                 New->oldZ= i+tz;
                  index=j-jstart+minRSub;
-                 cosPhi=cos(phi);
-                 sinPhi=sin(phi);
-                   r=positionR+j-jstart;
-                   New->x=r*cosPhi;
-                   New->y=r*sinPhi;
-                   New->oldX=New->x;
-                   New->oldY=New->y;
-//                 if(r>=0.5) New->weight=weight*r;
-//                 else       New->weight=weight*(r*r+r+0.25);
-                   New->weight=weight*(j-jstart+0.5);
+                 New->x=(index+r)*tx/r;
+                 New->y=(index+r)*ty/r;
+                 New->oldX=New->x;
+                 New->oldY=New->y;
+                 New->weight=weight*(2.0*index+1.0);
                  New->charge=charge;
 
                  New->Ez=New->Ex=New->Ey=0.0;
                  New->Bz=New->Bx=New->By=0.0;
                  
-                 z=i+positionZ-istart+minZSub;
+                 z=i+tz-istart+minZSub;
                  if(z>minZ && z<maxZ) {
                    v1=alpha*(z-z0)+pz0;
                    v1=maxwellianVelocity(LL->temperatureZ)/velocityC+v1;
@@ -265,15 +275,13 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
                  New->core=myrank;            
 
                  cnt++; 
-                 phi+=dPhi;
                }		//end of while(cnt)
              }			//end of for(n)
            }	
          } 		//end of for(lnodes)  
-       gsl_qrng_free(q);
 
      }			//End of for(i,j)
-
+     gsl_qrng_free(q);
 }
 
 double maxwellianVelocity(double temperature)
@@ -322,16 +330,13 @@ void random2D_sobol(double *x,double *y,gsl_qrng *q)
    *y=v[1];
 }
 
-void random3D_sobol(double *x,double *y,double *z)
+void random3D_sobol(double *z,double *x,double *y,gsl_qrng *q)
 {
    double v[3];
-   gsl_qrng *q = gsl_qrng_alloc (gsl_qrng_sobol,3);
 
    gsl_qrng_get(q,v);
-   *x=v[0];
-   *y=v[1];
-   *z=v[2];
-
-   gsl_qrng_free(q);
+   *z=v[0];
+   *x=v[1];
+   *y=v[2];
 }
 

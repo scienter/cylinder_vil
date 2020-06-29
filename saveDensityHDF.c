@@ -27,9 +27,9 @@ void saveDensityHDF(Domain *D,int iteration)
 {
     int i,j,m,s,istart,iend,jstart,jend,nx,ny,nz,numMode;
     int biasX,biasY,offSetY,rankX,rankY,minRSub;
-    int nxSub,nySub;
+    int nxSub,nySub,iter;
     int offset[3];
-    double ***dataR,***dataI;
+    double ***dataR,***dataI,***val;
     double charge,coef;
     char name[100],dataName[100],fileName[100];
     LoadList *LL;
@@ -45,6 +45,7 @@ void saveDensityHDF(Domain *D,int iteration)
     istart=D->istart;  iend=D->iend;
     jstart=D->jstart;  jend=D->jend;
     numMode=D->numMode;
+	 iter=D->filterIter;
 
     rankX=myrank/D->M;
     rankY=myrank%D->M;
@@ -88,6 +89,28 @@ void saveDensityHDF(Domain *D,int iteration)
         MPI_TransferDen_Xplus(D,dataR,dataI,nySub+5,3);
         MPI_TransferDen_Xminus(D,dataR,dataI,nySub+5,3);
       }  else ;
+
+      filter(D,dataR,dataI);
+/*
+      val=(double ***)malloc(1*sizeof(double ** ));
+      for(m=0; m<1; m++) {
+        val[m]=(double **)malloc((D->nxSub+5)*sizeof(double * ));
+        for(i=0; i<D->nxSub+5; i++)
+          val[m][i]=(double *)malloc((D->nySub+5)*sizeof(double  ));
+      }
+      for(i=0; i<D->nxSub+5; i++)
+        for(j=0; j<D->nySub+5; j++)
+          val[0][i][j]=0.0;
+    
+      filter_current(D,val,dataR,iter);
+      filter_current(D,val,dataI,iter);
+
+      for(i=0; i<D->nxSub+5; i++) free(val[0][i]);
+      free(val[0]); free(val);
+*/
+
+
+
 
 //      solveCharge(D,dataR,dataI,rho0[s],s);
 

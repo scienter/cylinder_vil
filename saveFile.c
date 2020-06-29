@@ -24,7 +24,7 @@ void saveFile(Domain D,int iteration)
   void saveCurrent();
   LoadList *LL;
 
-/*
+
   //save current
   if(D.currentSave==ON)   {
     if(D.saveCurrentMode==TXT)  
@@ -37,7 +37,7 @@ void saveFile(Domain D,int iteration)
       printf("J%d is made.\n",iteration); 
     else	;
   }	else	;
-*/
+
 
   //save field
   if(D.fieldSave==ON)   {
