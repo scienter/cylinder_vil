@@ -12,7 +12,6 @@ int randomInt(int range);
 void loadPlasma_crystal(Domain *D,LoadList *LL,int s);
 void random1D_sobol(double *x,gsl_qrng *q);
 void random2D_sobol(double *x,double *y,gsl_qrng *q);
-void random3D_sobol(double *z,double *x,double *y,gsl_qrng *q);
 double randomValue(double beta);
 void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int iend,int jstart,int jend);
 
@@ -72,12 +71,11 @@ void loadPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int iend,i
 
 void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int iend,int jstart,int jend)
 {
-   int n,i,j,numberRZ,numPhi,cnt,l,t,index;
+   int n,i,j,numberRZ,numPhi,cnt,l,t,index,ii,jj,nn;
    int modeX,modeYZ,minRSub,minZSub;
    double z,r,R,posX,posY,posZ,v1,v2,v3,centerX,centerY,centerZ,tmp,weight,charge;
    double gaussCoefX,polyCoefX,gaussCoefYZ,polyCoefYZ,minZ,maxZ;
-   double tz,tx,ty,positionR;
-   double ne,randTest,dPhi,phi,z0,pz0,alpha,cosPhi,sinPhi;
+   double ne,randTest,positionZ,positionR,dPhi,phi,z0,pz0,alpha,cosPhi,sinPhi;
    int myrank;
    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
    Particle **particle;
@@ -107,12 +105,12 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
 
    srand((iteration+1)*myrank);
 
-/*
+       gsl_qrng *q = gsl_qrng_alloc (gsl_qrng_sobol,2);
    //position define      
-   gsl_qrng *q = gsl_qrng_alloc (gsl_qrng_sobol,2);
    for(i=istart; i<iend; i++)
-     for(j=jstart+2; j<jend; j++)
+     for(j=jstart+1; j<jend; j++)
      {
+
        for(l=0; l<LL->xnodes-1; l++)
          for(t=0; t<LL->ynodes-1; t++)
          {
@@ -135,78 +133,73 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
              weight=ne/(double)(numPhi*numberRZ);
              dPhi=2.0*pi/((double)numPhi);
  
-             for(n=0; n<numberRZ; n++) {
-//					r=2.0;
-//               while(r>=1.0 || r==0.0) {
-                 random2D_sobol(&tz,&positionR,q);
-//                 tz=randomValue(1.0);
-//                 tx=randomValue(1.0);
-//                 ty=randomValue(1.0);
-//                 tx=2.0*tx-1.0;
-//                 ty=2.0*ty-1.0;
-//                 r=sqrt(tx*tx+ty*ty);
-//               }
+			    jj=j-jstart;
+             for(n=0; n<numberRZ; n+=2) {
+//               random2D_sobol(&positionZ,&positionR,q);
+               positionZ=randomValue(1.0);             
+               positionR=randomValue(1.0);             
+					for(nn=0; nn<2; nn++)  {
+                 if(nn==1) {
+					    positionR=sqrt(2.0*(jj+1)*(jj+1)-(2*jj+1)-(jj+positionR)*(jj+positionR))-jj;
+						 positionZ=1.0-positionZ;
+					  }  else ;
 
-               cnt=0;
-               phi=randomValue(1.0)*2.0*pi;             
-//               phi=0.5*dPhi;
-               while(cnt<numPhi)  {      
-//                 positionZ=randomValue(1.0);
-//                 positionR=randomValue(1.0);
-
-                 New = (ptclList *)malloc(sizeof(ptclList)); 
-                 New->next = particle[i][j].head[s]->pt;
-                 particle[i][j].head[s]->pt = New;
+                 cnt=0;
+                 phi=randomValue(1.0)*2.0*pi;             
+                 while(cnt<numPhi)  {      
+                   New = (ptclList *)malloc(sizeof(ptclList)); 
+                   New->next = particle[i][j].head[s]->pt;
+                   particle[i][j].head[s]->pt = New;
  
-                 New->z = tz;
-                 New->oldZ= i+tz;
-                 index=j-jstart+minRSub;
-                 cosPhi=cos(phi);
-                 sinPhi=sin(phi);
+                   New->z = positionZ;
+                   New->oldZ= i+positionZ;
+                   index=j-jstart+minRSub;
+                   cosPhi=cos(phi);
+                   sinPhi=sin(phi);
                    r=positionR+j-jstart;
                    New->x=r*cosPhi;
                    New->y=r*sinPhi;
-//                   New->x=(index+r)*tx/r;
-//                   New->y=(index+r)*ty/r;
                    New->oldX=New->x;
                    New->oldY=New->y;
-                   New->weight=weight*(2.0*index+1.0);
-                 New->charge=charge;
+                   New->weight=weight*(2.0*jj+1.0);
+                   New->charge=charge;
 
-                 New->Ez=New->Ex=New->Ey=0.0;
-                 New->Bz=New->Bx=New->By=0.0;
+                   New->Ez=New->Ex=New->Ey=0.0;
+                   New->Bz=New->Bx=New->By=0.0;
                  
-                 z=i+tz-istart+minZSub;
-                 if(z>minZ && z<maxZ) {
-                   v1=alpha*(z-z0)+pz0;
-                   v1=maxwellianVelocity(LL->temperatureZ)/velocityC+v1;
-                   v2=maxwellianVelocity(LL->temperatureR)/velocityC;
-                   v3=maxwellianVelocity(LL->temperatureR)/velocityC;
-                 } else {
-                   v1=maxwellianVelocity(LL->temperatureZ)/velocityC;
-                   v2=maxwellianVelocity(LL->temperatureR)/velocityC;
-                   v3=maxwellianVelocity(LL->temperatureR)/velocityC;
-                 }
-                 New->pz=v1;      New->px=v2;       New->py=v3;
-                 LL->index+=1;
-                 New->index=LL->index;            
-                 New->core=myrank;            
+                   z=i+positionZ-istart+minZSub;
+                   if(z>minZ && z<maxZ) {
+                     v1=alpha*(z-z0)+pz0;
+                     v1=maxwellianVelocity(LL->temperatureZ)/velocityC+v1;
+                     v2=maxwellianVelocity(LL->temperatureR)/velocityC;
+                     v3=maxwellianVelocity(LL->temperatureR)/velocityC;
+                   } else {
+                     v1=maxwellianVelocity(LL->temperatureZ)/velocityC;
+                     v2=maxwellianVelocity(LL->temperatureR)/velocityC;
+                     v3=maxwellianVelocity(LL->temperatureR)/velocityC;
+                   }
+                   New->pz=v1;      New->px=v2;       New->py=v3;
+                   LL->index+=1;
+                   New->index=LL->index;            
+                   New->core=myrank;            
 
-                 cnt++; 
-                 phi+=dPhi;
-               }		//end of while(cnt)
+                   cnt++; 
+                   phi+=dPhi;
+                 }		//end of while(cnt)
+               }		//end of for(nn<2)
              }			//end of for(n)
+
            }	
          } 		//end of for(lnodes)  
 
      }			//End of for(i,j)
-     gsl_qrng_free(q);
-*/
+//       gsl_qrng_free(q);
 
-   gsl_qrng *q = gsl_qrng_alloc (gsl_qrng_sobol,3);
+   //position define      
    for(i=istart; i<iend; i++)
-     for(j=jstart; j<jend; j++)
+     for(j=jstart; j<jstart+1; j++)
      {
+
        for(l=0; l<LL->xnodes-1; l++)
          for(t=0; t<LL->ynodes-1; t++)
          {
@@ -222,66 +215,75 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
 //             ne*=tmp;
              tmp=applyFunctionYZ(modeYZ,centerY,posY,centerZ,posZ,gaussCoefYZ,polyCoefYZ);
              ne*=tmp;
-//             ne*=LL->numberRZ;	//it is the double number of superparticles.
-//             intNum=(int)ne;
-//             randTest=ne-intNum;
-//             if(randTest>randomValue(1.0)) intNum=intNum+1;
              weight=ne/(double)(numPhi*numberRZ);
+             dPhi=2.0*pi/((double)numPhi);
+
+             jj=j-jstart; 
+             for(n=0; n<numberRZ; n+=2) {
+//               random2D_sobol(&positionZ,&positionR,q);
+               positionZ=randomValue(1.0);             
+               positionR=randomValue(1.0);             
+					for(nn=0; nn<2; nn++)  {
+                 if(nn==1) {
+//					    positionR=sqrt(0.5*(1.0-positionR*positionR));
+					    positionR=sqrt(2.0*(jj+1)*(jj+1)-(2*jj+1)-(jj+positionR)*(jj+positionR))-jj;
+						 positionZ=1.0-positionZ;
+//                   weight=ne/(double)(numPhi*numberRZ);
+					  }  else {
+//                   weight=ne/(double)(numPhi*numberRZ);
+					  }
+
+                 cnt=0;
+                 phi=randomValue(1.0)*2.0*pi;             
+                 while(cnt<numPhi)  {      
+                   New = (ptclList *)malloc(sizeof(ptclList)); 
+                   New->next = particle[i][j].head[s]->pt;
+                   particle[i][j].head[s]->pt = New;
  
-             for(n=0; n<numberRZ; n++) {
-					r=2.0;
-               while(r>=1.0 || r==0.0) {
-                 tz=randomValue(1.0);
-                 tx=randomValue(1.0);
-                 ty=randomValue(1.0);
-                 tx=2.0*tx-1.0;
-                 ty=2.0*ty-1.0;
-                 r=sqrt(tx*tx+ty*ty);
-               }
+                   New->z = positionZ;
+                   New->oldZ= i+positionZ;
+                   index=j-jstart+minRSub;
+                   cosPhi=cos(phi);
+                   sinPhi=sin(phi);
+                   r=positionR+j-jstart;
+                   New->x=r*cosPhi;
+                   New->y=r*sinPhi;
+                   New->oldX=New->x;
+                   New->oldY=New->y;
+                   New->weight=weight*(2.0*jj+1.0);
+                   New->charge=charge;
 
-               cnt=0;
-               while(cnt<numPhi)  {      
-                 New = (ptclList *)malloc(sizeof(ptclList)); 
-                 New->next = particle[i][j].head[s]->pt;
-                 particle[i][j].head[s]->pt = New;
- 
-                 New->z = tz;
-                 New->oldZ= i+tz;
-                 index=j-jstart+minRSub;
-                 New->x=(index+r)*tx/r;
-                 New->y=(index+r)*ty/r;
-                 New->oldX=New->x;
-                 New->oldY=New->y;
-                 New->weight=weight*(2.0*index+1.0);
-                 New->charge=charge;
+                   New->Ez=New->Ex=New->Ey=0.0;
+                   New->Bz=New->Bx=New->By=0.0;
+                  
+                   z=i+positionZ-istart+minZSub;
+                   if(z>minZ && z<maxZ) {
+                     v1=alpha*(z-z0)+pz0;
+                     v1=maxwellianVelocity(LL->temperatureZ)/velocityC+v1;
+                     v2=maxwellianVelocity(LL->temperatureR)/velocityC;
+                     v3=maxwellianVelocity(LL->temperatureR)/velocityC;
+                   } else {
+                     v1=maxwellianVelocity(LL->temperatureZ)/velocityC;
+                     v2=maxwellianVelocity(LL->temperatureR)/velocityC;
+                     v3=maxwellianVelocity(LL->temperatureR)/velocityC;
+                   }
+                   New->pz=v1;      New->px=v2;       New->py=v3;
+                   LL->index+=1;
+                   New->index=LL->index;            
+                   New->core=myrank;            
 
-                 New->Ez=New->Ex=New->Ey=0.0;
-                 New->Bz=New->Bx=New->By=0.0;
-                 
-                 z=i+tz-istart+minZSub;
-                 if(z>minZ && z<maxZ) {
-                   v1=alpha*(z-z0)+pz0;
-                   v1=maxwellianVelocity(LL->temperatureZ)/velocityC+v1;
-                   v2=maxwellianVelocity(LL->temperatureR)/velocityC;
-                   v3=maxwellianVelocity(LL->temperatureR)/velocityC;
-                 } else {
-                   v1=maxwellianVelocity(LL->temperatureZ)/velocityC;
-                   v2=maxwellianVelocity(LL->temperatureR)/velocityC;
-                   v3=maxwellianVelocity(LL->temperatureR)/velocityC;
-                 }
-                 New->pz=v1;      New->px=v2;       New->py=v3;
-                 LL->index+=1;
-                 New->index=LL->index;            
-                 New->core=myrank;            
-
-                 cnt++; 
-               }		//end of while(cnt)
+                   cnt++; 
+                   phi+=dPhi;
+                 }		//end of while(cnt)
+               }		//end of for(nn<2)
              }			//end of for(n)
+
            }	
          } 		//end of for(lnodes)  
 
      }			//End of for(i,j)
-     gsl_qrng_free(q);
+       gsl_qrng_free(q);
+
 }
 
 double maxwellianVelocity(double temperature)
@@ -330,13 +332,16 @@ void random2D_sobol(double *x,double *y,gsl_qrng *q)
    *y=v[1];
 }
 
-void random3D_sobol(double *z,double *x,double *y,gsl_qrng *q)
+void random3D_sobol(double *x,double *y,double *z)
 {
    double v[3];
+   gsl_qrng *q = gsl_qrng_alloc (gsl_qrng_sobol,3);
 
    gsl_qrng_get(q,v);
-   *z=v[0];
-   *x=v[1];
-   *y=v[2];
+   *x=v[0];
+   *y=v[1];
+   *z=v[2];
+
+   gsl_qrng_free(q);
 }
 
