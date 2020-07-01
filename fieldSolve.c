@@ -355,7 +355,6 @@ void Bsolve2D_Yee(Domain *D)
     }
 }
 
-//lala
 void Esolve2D_Yee(Domain *D,double dF,int iteration)
 {
   int i,j,m,numMode,istart,iend,jstart,jend,a;  

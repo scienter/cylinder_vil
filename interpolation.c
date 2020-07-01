@@ -199,6 +199,37 @@ void interpolation_NDFX_1st(Domain *D,External *Ext,int iteration)
                sins2[m]=sins2[m-1]*coss2[1]+coss2[m-1]*sins2[1];
              }
 
+             Pr=Pl=Sr=Sl=0.0;
+             WR2=r/0.5;     WR1=1.0-WR2;
+				 m=0;
+             Pr+=WZ1*WR2*D->PrR[m][i1-1][j1]
+				    +WZ2*WR2*D->PrR[m][i1][j1];
+             Pl+=WZ1*WR2*D->PlR[m][i1-1][j1]
+				    +WZ2*WR2*D->PlR[m][i1][j1];
+             Sr+=WZ1*WR2*D->SrR[m][i1-1][j1]
+				    +WZ2*WR2*D->SrR[m][i1][j1];
+             Sl+=WZ1*WR2*D->SlR[m][i1-1][j1]
+				    +WZ2*WR2*D->SlR[m][i1][j1];
+             m=1;
+             Pr+=WZ1*D->PrR[m][i1-1][j1]*coss[m]-WZ1*D->PrI[m][i1-1][j1]*sins[m]
+                +WZ2*D->PrR[m][i1][j1]*coss[m]  -WZ2*D->PrI[m][i1][j1]*sins[m];
+             Pl+=WZ1*D->PlR[m][i1-1][j1]*coss[m]-WZ1*D->PlI[m][i1-1][j1]*sins[m]
+                +WZ2*D->PlR[m][i1][j1]*coss[m]  -WZ2*D->PlI[m][i1][j1]*sins[m];
+             Sr+=WZ1*D->SrR[m][i1-1][j1]*coss[m]-WZ1*D->SrI[m][i1-1][j1]*sins[m]
+                +WZ2*D->SrR[m][i1][j1]*coss[m]  -WZ2*D->SrI[m][i1][j1]*sins[m];
+             Sl+=WZ1*D->SlR[m][i1-1][j1]*coss[m]-WZ1*D->SlI[m][i1-1][j1]*sins[m]
+                +WZ2*D->SlR[m][i1][j1]*coss[m]  -WZ2*D->SlI[m][i1][j1]*sins[m];
+             for(m=2; m<numMode; m++) {
+               Pr+=WZ1*WR2*D->PrR[m][i1-1][j1]*coss[m]-WZ1*WR2*D->PrI[m][i1-1][j1]*sins[m]
+                  +WZ2*WR2*D->PrR[m][i1][j1]*coss[m]  -WZ2*WR2*D->PrI[m][i1][j1]*sins[m];
+               Pl+=WZ1*WR2*D->PlR[m][i1-1][j1]*coss[m]-WZ1*WR2*D->PlI[m][i1-1][j1]*sins[m]
+                  +WZ2*WR2*D->PlR[m][i1][j1]*coss[m]  -WZ2*WR2*D->PlI[m][i1][j1]*sins[m];
+               Sr+=WZ1*WR2*D->SrR[m][i1-1][j1]*coss[m]-WZ1*WR2*D->SrI[m][i1-1][j1]*sins[m]
+                  +WZ2*WR2*D->SrR[m][i1][j1]*coss[m]  -WZ2*WR2*D->SrI[m][i1][j1]*sins[m];
+               Sl+=WZ1*WR2*D->SlR[m][i1-1][j1]*coss[m]-WZ1*WR2*D->SlI[m][i1-1][j1]*sins[m]
+                  +WZ2*WR2*D->SlR[m][i1][j1]*coss[m]  -WZ2*WR2*D->SlI[m][i1][j1]*sins[m];
+				 }
+/*
              Pr0=D->PrR[0][i1-1][j1]; Pr1=D->PrR[0][i1][j1];
              Pr2=D->PrR[0][i1-1][j1]; Pr3=D->PrR[0][i1][j1];
              Pl0=D->PlR[0][i1-1][j1]; Pl1=D->PlR[0][i1][j1];
@@ -234,6 +265,7 @@ void interpolation_NDFX_1st(Domain *D,External *Ext,int iteration)
              Pl=WZ1*WR2*Pl0+WZ2*WR2*Pl1+WZ1*WR1*Pl2+WZ2*WR1*Pl3;
              Sr=WZ1*WR2*Sr0+WZ2*WR2*Sr1+WZ1*WR1*Sr2+WZ2*WR1*Sr3;
              Sl=WZ1*WR2*Sl0+WZ2*WR2*Sl1+WZ1*WR1*Sl2+WZ2*WR1*Sl3;
+*/				 
            } else {
              WR2=r+0.5-((int)(r+0.5));  WR1=1.0-WR2;
 
@@ -288,6 +320,7 @@ void interpolation_NDFX_1st(Domain *D,External *Ext,int iteration)
                   +WZ2*WR2*D->SlI[m][i1][j1])*sins[m]);
              }
            }
+
 
            //Ex, Bx
            Ez=wz1*wr1*D->EzR[0][i][j]

@@ -157,6 +157,7 @@ void loadPolygonPlasma(Domain *D,LoadList *LL,int s,int iteration,int istart,int
                    cosPhi=cos(phi);
                    sinPhi=sin(phi);
                    r=positionR+j-jstart;
+	 if(r==0) printf("r=%g, j=%d\n",r,j);
                    New->x=r*cosPhi;
                    New->y=r*sinPhi;
                    New->oldX=New->x;

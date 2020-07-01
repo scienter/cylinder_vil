@@ -165,8 +165,9 @@ if(shiftZ>=1.0 || shiftX>=1.0 || shiftY>=1.0)
              p->oldX=p->x; p->x+=shiftX;
              p->oldY=p->y; p->y+=shiftY;
 
-             R=sqrt(p->x*p->x+p->y*p->y);
-             if(R==0.0) { p->x+=numeric; p->y+=numeric; } else ;
+//             R=sqrt(p->x*p->x+p->y*p->y);
+//             if(R==0.0) { p->x+=numeric; p->y+=numeric; } else ;
+//             if(R==0.0) { printf("x=%g, y=%g, i=%d, j=%d\n",p->x,p->y,i,j); } else ;
              
              p=p->next;
           }		//End of while(p)

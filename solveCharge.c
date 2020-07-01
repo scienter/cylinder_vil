@@ -63,22 +63,7 @@ void solveF_NDFX(Domain *D)
     MPI_TransferDen_Xminus(D,D->RhoNoPairR,D->RhoNoPairI,D->nySub+5,3);
   }  else ;
 
-  val=(double ***)malloc(1*sizeof(double ** ));
-  for(n=0; n<1; n++) {
-    val[n]=(double **)malloc((D->nxSub+5)*sizeof(double * ));
-    for(i=0; i<D->nxSub+5; i++)
-      val[n][i]=(double *)malloc((D->nySub+5)*sizeof(double  ));
-  }
-  for(i=0; i<D->nxSub+5; i++)
-    for(j=0; j<D->nySub+5; j++)
-      val[0][i][j]=0.0;
-
-  filter_current(D,val,D->RhoNoPairR,iter);
-  filter_current(D,val,D->RhoNoPairI,iter);
-
-  for(i=0; i<D->nxSub+5; i++) free(val[0][i]);
-  free(val[0]); free(val);
-
+  filter(D,D->RhoNoPairR,D->RhoNoPairI);
 
   m=0;
   for(i=istart; i<iend; i++)
@@ -187,24 +172,7 @@ void solveF_Yee(Domain *D)
     MPI_TransferDen_Xplus(D,D->RhoNoPairR,D->RhoNoPairI,D->nySub+5,3);
     MPI_TransferDen_Xminus(D,D->RhoNoPairR,D->RhoNoPairI,D->nySub+5,3);
   }  else ;
-
-  val=(double ***)malloc(1*sizeof(double ** ));
-  for(n=0; n<1; n++) {
-    val[n]=(double **)malloc((D->nxSub+5)*sizeof(double * ));
-    for(i=0; i<D->nxSub+5; i++)
-      val[n][i]=(double *)malloc((D->nySub+5)*sizeof(double  ));
-  }
-  for(i=0; i<D->nxSub+5; i++)
-    for(j=0; j<D->nySub+5; j++)
-      val[0][i][j]=0.0;
-
-  filter_current(D,val,D->RhoNoPairR,iter);
-  filter_current(D,val,D->RhoNoPairI,iter);
-
-  for(i=0; i<D->nxSub+5; i++) free(val[0][i]);
-  free(val[0]); free(val);
-
-//  if(myrank==0) istart=D->istart+1; else ;
+  filter(D,D->RhoNoPairR,D->RhoNoPairI);
 
   m=0;
   for(i=istart; i<iend; i++)
@@ -302,7 +270,7 @@ void solveCharge(Domain *D,LoadList *LL,double ***rhoR,double ***rhoI,int istart
 
   alpha=2.0;
   for(i=istart; i<iend; i++)
-    for(j=jstart; j<jend; j++)
+    for(j=jstart+1; j<jend; j++)
       {
         p=particle[i][j].head[s]->pt;
         while(p) {
@@ -337,5 +305,50 @@ void solveCharge(Domain *D,LoadList *LL,double ***rhoR,double ***rhoI,int istart
         }
       }		//End of for(i,j)
 
+  for(i=istart; i<iend; i++)
+    for(j=jstart; j<jstart+1; j++)
+      {
+        p=particle[i][j].head[s]->pt;
+        while(p) {
+          weight=coef*p->weight*rho0*p->charge;
+          z=p->z; x=p->x; y=p->y;
+          r=sqrt(x*x+y*y);   invR=1.0/r;
+          index=j-jstart;
+
+          Wr[0]=((index+1)*(index+1)-r*r)/(2.0*index+1.0);
+          Wr[1]=1.0-Wr[0];
+          Wz[1]=z-(int)(z);              Wz[0]=1.0-Wz[1];
+
+          coss[1]=x*invR; sins[1]=y*invR;
+          for(m=2; m<numMode; m++) {
+            coss[m]=coss[m-1]*coss[1]-sins[m-1]*sins[1];
+            sins[m]=sins[m-1]*coss[1]+coss[m-1]*sins[1];
+          }
+
+          factor=weight/(2.0*index+1.0);
+          for(ii=0; ii<2; ii++)
+            for(jj=0; jj<1; jj++) {
+//              factor=weight/(2.0*(j+jj-jstart));
+              tmp=2.0*Wr[jj]*Wz[ii]*factor;
+              rhoR[0][i+ii][j+jj]+=tmp;
+              for(m=1; m<numMode; m++) {
+                rhoR[m][i+ii][j+jj]+=tmp*coss[m]*alpha;
+                rhoI[m][i+ii][j+jj]-=tmp*sins[m]*alpha;
+              }
+            }
+          for(ii=0; ii<2; ii++)
+            for(jj=1; jj<2; jj++) {
+//              factor=weight/(2.0*(j+jj-jstart));
+              tmp=Wr[jj]*Wz[ii]*factor;
+              rhoR[0][i+ii][j+jj]+=tmp;
+              for(m=1; m<numMode; m++) {
+                rhoR[m][i+ii][j+jj]+=tmp*coss[m]*alpha;
+                rhoI[m][i+ii][j+jj]-=tmp*sins[m]*alpha;
+              }
+            }
+
+          p=p->next;
+        }
+      }		//End of for(i,j)
 }
 

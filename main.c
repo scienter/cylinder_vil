@@ -8,8 +8,8 @@
 int main(int argc, char *argv[])
 {
     int i,j,k,n,s,iteration=0,boost,filterStep,labSaveStep;
-    int rnk,suddenDump=OFF,shiftIteration,iter;
-    double factor,time_spent,t,dF=0.0,x,***val;
+    int rnk,suddenDump=OFF,shiftIteration;
+    double factor,time_spent,t,dF=0.0,x;
     clock_t begin,end;
     struct tm *t_now;
     time_t timer; 	//measure time
@@ -95,23 +95,6 @@ int main(int argc, char *argv[])
       }  else ;
       filter(&D,D.RhoPairR,D.RhoPairI);
 	
-/*
-      val=(double ***)malloc(1*sizeof(double ** ));
-      for(n=0; n<1; n++) {
-        val[n]=(double **)malloc((D.nxSub+5)*sizeof(double * ));
-        for(i=0; i<D.nxSub+5; i++)
-          val[n][i]=(double *)malloc((D.nySub+5)*sizeof(double  ));
-      }
-      for(i=0; i<D.nxSub+5; i++)
-        for(j=0; j<D.nySub+5; j++)
-          val[0][i][j]=0.0;
-    
-      filter_current(&D,val,D.RhoPairR,D.filterIter);
-      filter_current(&D,val,D.RhoPairI,D.filterIter);
-
-      for(i=0; i<D.nxSub+5; i++) free(val[0][i]);
-      free(val[0]); free(val);
-*/		
 
     } else ;
 

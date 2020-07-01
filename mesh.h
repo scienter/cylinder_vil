@@ -27,13 +27,16 @@
 #define DOWNFRONT	7
 #define DOWNBACK	8
 
+#define Lifschitz	1
+#define Davidson	2
+
 typedef struct _Domain 
 {
    int dimension;
    int filter,filterIter;
 
    int fieldType;
-   int currentType;
+   int currentType,currentCons;
    int interpolationType;
 
    int maxTime;

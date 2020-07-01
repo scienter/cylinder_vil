@@ -20,6 +20,7 @@ double whatMass(int species);
 int whatCharge(int species);
 int whatFunctionMode(char *str);
 int whatDefineMode(char *str);
+int whatCurrentCons(char *str);
 
 void parameterSetting(Domain *D,External *Ext, char *input)
 {
@@ -88,6 +89,8 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    if(FindParameters("Domain",1,"interpolation_order",input,str)) D->interpolationType=atoi(str);
    else 
       D->interpolationType=1;
+   if(FindParameters("Domain",1,"current_conservation",input,str)) D->currentCons=whatCurrentCons(str);
+   else D->currentCons=Lifschitz;
 
    //Boost frame
    if(FindParameters("Domain",1,"boost_gamma",input,str)) D->gamma=atof(str);
@@ -390,6 +393,7 @@ void parameterSetting(Domain *D,External *Ext, char *input)
    {
      printf("dz=%g,dr=%g,dt=%g,gamma=%g\n",D->dz,D->dr,D->dt,D->gamma);
      printf("shiftDuration=%d,divisionLambda=%g\n",D->shiftDuration,D->divisionLambda);
+     printf("current_conservation=%d, 1:Lifschitz,  2:Davidson\n",D->currentCons);
    }
    else ;
    MPI_Barrier(MPI_COMM_WORLD);
@@ -1158,6 +1162,14 @@ int whatFunctionMode(char *str)
    if(strstr(str,"Constant")) 		return Constant;
    else if(strstr(str,"Gaussian"))   	return Gaussian;
    else if(strstr(str,"Polynomial"))   	return Polynomial;
+   else return 0;
+}
+
+
+int whatCurrentCons(char *str)
+{
+   if(strstr(str,"Lifschitz")) 		   return Lifschitz;
+   else if(strstr(str,"Davidson"))   	return Davidson;
    else return 0;
 }
 
