@@ -413,7 +413,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
 
                //delta function and weights
 
-              //Jp
+            //Jp
             vp=coss[1]*(yr-y1)*drBydt-sins[1]*(xr-x1)*drBydt;
             factor=vp*weight*coeff[s]/(2.0*j1+1.0);
 				if(j1==0) {
@@ -422,7 +422,7 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
               tmpP[0][1]=Wz[0]*Wr[1]*factor;
               tmpP[1][1]=Wz[1]*Wr[1]*factor;
               for(ii=0; ii<2; ii++)
-                for(jj=0; jj<2; jj++)
+                for(jj=1; jj<2; jj++)
                   D->JpR[0][i1+ii][jj+j1+jstart]+=tmpP[ii][jj];
 				  if(D->currentCons==Lifschitz) {
                 m=1;
@@ -467,17 +467,16 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
                     D->JpR[m][ii+i1][jj+j1+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(sin2[m]-sins[m])-Wz1[ii]*Wr1[jj]*(sin1[m]-sins[m]));
                     D->JpI[m][ii+i1][jj+j1+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(cos2[m]-coss[m])-Wz1[ii]*Wr1[jj]*(cos1[m]-coss[m]));
   					   }
-						for(m=2; m<numMode; m++)  {
-						  for(ii=0; ii<2; ii++)
-							 for(jj=1; jj<2; jj++)  {	
-								factM=alpha*(j1+jj)/(m*1.0)*drBydt;
-								D->JpR[m][ii+i1][jj+j1+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(sin2[m]-sins[m])-Wz1[ii]*Wr1[jj]*(sin1[m]-sins[m]));
-								D->JpI[m][ii+i1][jj+j1+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(cos2[m]-coss[m])-Wz1[ii]*Wr1[jj]*(cos1[m]-coss[m]));
-						    }
-						}
+                for(m=2; m<numMode; m++)  
+                  for(ii=0; ii<2; ii++)
+					     for(jj=1; jj<2; jj++)  {	
+						    factM=alpha*(j1+jj)/(m*1.0)*drBydt;
+							 D->JpR[m][ii+i1][jj+j1+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(sin2[m]-sins[m])-Wz1[ii]*Wr1[jj]*(sin1[m]-sins[m]));
+							 D->JpI[m][ii+i1][jj+j1+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(cos2[m]-coss[m])-Wz1[ii]*Wr1[jj]*(cos1[m]-coss[m]));
+						  }
+				    
 				  }
-				} else {
-					
+				} else {					
               tmpP[0][0]=Wz[0]*Wr[0]*factor;
               tmpP[1][0]=Wz[1]*Wr[0]*factor;
               tmpP[0][1]=Wz[0]*Wr[1]*factor;
@@ -516,8 +515,8 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
                       D->JpR[m][ii+i1][jj+j1+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(sin2[m]-sins[m])-Wz1[ii]*Wr1[jj]*(sin1[m]-sins[m]));
                       D->JpI[m][ii+i1][jj+j1+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(cos2[m]-coss[m])-Wz1[ii]*Wr1[jj]*(cos1[m]-coss[m]));
                     }
-				    }
 				  }
+				}
 
 //step 2 --------------------------------------------------------------
             rc=0.5*(rr+r2);     zc=0.5*(zr+z2);
@@ -626,14 +625,14 @@ void updateCurrent_umeda(Domain *D,int nSpecies,int iteration)
                     D->JpR[m][ii+i2][jj+j2+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(sin2[m]-sins[m])-Wz1[ii]*Wr1[jj]*(sin1[m]-sins[m]));
                     D->JpI[m][ii+i2][jj+j2+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(cos2[m]-coss[m])-Wz1[ii]*Wr1[jj]*(cos1[m]-coss[m]));
   					   }
-						for(m=2; m<numMode; m++)  {
-						  for(ii=0; ii<2; ii++)
-							 for(jj=1; jj<2; jj++)  {
-								factM=alpha*(j2+jj)/(m*1.0)*drBydt;
-								D->JpR[m][ii+i2][jj+j2+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(sin2[m]-sins[m])-Wz1[ii]*Wr1[jj]*(sin1[m]-sins[m]));
-								D->JpI[m][ii+i2][jj+j2+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(cos2[m]-coss[m])-Wz1[ii]*Wr1[jj]*(cos1[m]-coss[m]));
-						    }
-						}
+			       for(m=2; m<numMode; m++)  {
+					   for(ii=0; ii<2; ii++)
+					     for(jj=1; jj<2; jj++)  {
+						    factM=alpha*(j2+jj)/(m*1.0)*drBydt;
+							 D->JpR[m][ii+i2][jj+j2+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(sin2[m]-sins[m])-Wz1[ii]*Wr1[jj]*(sin1[m]-sins[m]));
+							 D->JpI[m][ii+i2][jj+j2+jstart]+=factM*factor*(Wz2[ii]*Wr2[jj]*(cos2[m]-coss[m])-Wz1[ii]*Wr1[jj]*(cos1[m]-coss[m]));
+						  }
+				    }
 				  }
 				} else {
               tmpP[0][0]=Wz[0]*Wr[0]*factor;
